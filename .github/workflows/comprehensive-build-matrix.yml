@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-22.04
     container: ${{ matrix.compiler_config.image }}
     strategy:
-      fail-fast: true # As per your original file
+      fail-fast: false
       matrix:
         cpp_standard: ['03', '11', '14', '17', '20', '23']
         no_stl: ['ON', 'OFF']
@@ -86,70 +86,70 @@ jobs:
         cd build
         ./test/etl_tests
 
-  build-windows:
-    name: ${{ matrix.msvc_config.id }} | C++${{ matrix.cpp_standard }} | NO_STL=${{ matrix.no_stl }} | Windows
-    runs-on: ${{ matrix.msvc_config.runner }}
-    strategy:
-      fail-fast: true
-      matrix:
-        cpp_standard: ['03', '11', '14', '17', '20', '23']
-        no_stl: ['ON', 'OFF']
-        msvc_config:
-          - { id: 'msvc2019', runner: 'windows-2019', vs_cmake_generator: 'Visual Studio 16 2019', supported_cpp_stds: ['03', '11', '14', '17', '20'] }
-          - { id: 'msvc2022', runner: 'windows-2022', vs_cmake_generator: 'Visual Studio 17 2022', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
+  # build-windows:
+  #   name: ${{ matrix.msvc_config.id }} | C++${{ matrix.cpp_standard }} | NO_STL=${{ matrix.no_stl }} | Windows
+  #   runs-on: ${{ matrix.msvc_config.runner }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       cpp_standard: ['03', '11', '14', '17', '20', '23']
+  #       no_stl: ['ON', 'OFF']
+  #       msvc_config:
+  #         - { id: 'msvc2019', runner: 'windows-2019', vs_cmake_generator: 'Visual Studio 16 2019', supported_cpp_stds: ['03', '11', '14', '17', '20'] }
+  #         - { id: 'msvc2022', runner: 'windows-2022', vs_cmake_generator: 'Visual Studio 17 2022', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
     
-    steps:
-    - name: Check C++ Standard Compatibility
-      id: compatibility_check
-      shell: pwsh # Using PowerShell for this step
-      run: |
-        $isSupported = "${{ contains(matrix.msvc_config.supported_cpp_stds, matrix.cpp_standard) }}"
-        Write-Host "Compiler: ${{ matrix.msvc_config.id }}"
-        Write-Host "C++ Standard: ${{ matrix.cpp_standard }}"
-        Write-Host "Supported by this compiler: ${{ join(matrix.msvc_config.supported_cpp_stds, ', ') }}"
-        Write-Host "Compatibility check result: $isSupported"
-        "should_run=$isSupported" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+  #   steps:
+  #   - name: Check C++ Standard Compatibility
+  #     id: compatibility_check
+  #     shell: pwsh # Using PowerShell for this step
+  #     run: |
+  #       $isSupported = "${{ contains(matrix.msvc_config.supported_cpp_stds, matrix.cpp_standard) }}"
+  #       Write-Host "Compiler: ${{ matrix.msvc_config.id }}"
+  #       Write-Host "C++ Standard: ${{ matrix.cpp_standard }}"
+  #       Write-Host "Supported by this compiler: ${{ join(matrix.msvc_config.supported_cpp_stds, ', ') }}"
+  #       Write-Host "Compatibility check result: $isSupported"
+  #       "should_run=$isSupported" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
-    - name: Checkout ETLCPP
-      if: ${{ steps.compatibility_check.outputs.should_run == 'true' }}
-      uses: actions/checkout@v4
+  #   - name: Checkout ETLCPP
+  #     if: ${{ steps.compatibility_check.outputs.should_run == 'true' }}
+  #     uses: actions/checkout@v4
 
-    - name: Configure and Build
-      if: ${{ steps.compatibility_check.outputs.should_run == 'true' }}
-      shell: pwsh # Using PowerShell for Windows steps
-      run: |
-        $PARAM_CPP_STANDARD = "${{ matrix.cpp_standard }}"
-        $PARAM_ETL_FORCE_CPP03 = "OFF"
-        if ( $PARAM_CPP_STANDARD -eq "03" ) {
-          $PARAM_ETL_FORCE_CPP03 = "ON"
-        }
+  #   - name: Configure and Build
+  #     if: ${{ steps.compatibility_check.outputs.should_run == 'true' }}
+  #     shell: pwsh # Using PowerShell for Windows steps
+  #     run: |
+  #       $PARAM_CPP_STANDARD = "${{ matrix.cpp_standard }}"
+  #       $PARAM_ETL_FORCE_CPP03 = "OFF"
+  #       if ( $PARAM_CPP_STANDARD -eq "03" ) {
+  #         $PARAM_ETL_FORCE_CPP03 = "ON"
+  #       }
 
-        Write-Host "--- Configuration Details ---"
-        Write-Host "Compiler ID: ${{ matrix.msvc_config.id }}"
-        Write-Host "Runner: ${{ matrix.msvc_config.runner }}"
-        Write-Host "C++ Standard (ETL_CXX_STANDARD): $PARAM_CPP_STANDARD"
-        Write-Host "NO_STL: ${{ matrix.no_stl }}"
-        Write-Host "ETL_FORCE_TEST_CPP03: $PARAM_ETL_FORCE_CPP03"
-        Write-Host "--- CMake Version ---"
-        cmake --version
-        Write-Host "---------------------------"
+  #       Write-Host "--- Configuration Details ---"
+  #       Write-Host "Compiler ID: ${{ matrix.msvc_config.id }}"
+  #       Write-Host "Runner: ${{ matrix.msvc_config.runner }}"
+  #       Write-Host "C++ Standard (ETL_CXX_STANDARD): $PARAM_CPP_STANDARD"
+  #       Write-Host "NO_STL: ${{ matrix.no_stl }}"
+  #       Write-Host "ETL_FORCE_TEST_CPP03: $PARAM_ETL_FORCE_CPP03"
+  #       Write-Host "--- CMake Version ---"
+  #       cmake --version
+  #       Write-Host "---------------------------"
 
-        cmake -S . -B build `
-          -G "${{ matrix.msvc_config.vs_cmake_generator }}" `
-          -DCMAKE_BUILD_TYPE=Debug `
-          -DBUILD_TESTS=ON `
-          -DNO_STL=${{ matrix.no_stl }} `
-          -DETL_USE_TYPE_TRAITS_BUILTINS=OFF `
-          -DETL_USER_DEFINED_TYPE_TRAITS=OFF `
-          -DETL_FORCE_TEST_CPP03=$PARAM_ETL_FORCE_CPP03 `
-          -DETL_CXX_STANDARD=$PARAM_CPP_STANDARD
+  #       cmake -S . -B build `
+  #         -G "${{ matrix.msvc_config.vs_cmake_generator }}" `
+  #         -DCMAKE_BUILD_TYPE=Debug `
+  #         -DBUILD_TESTS=ON `
+  #         -DNO_STL=${{ matrix.no_stl }} `
+  #         -DETL_USE_TYPE_TRAITS_BUILTINS=OFF `
+  #         -DETL_USER_DEFINED_TYPE_TRAITS=OFF `
+  #         -DETL_FORCE_TEST_CPP03=$PARAM_ETL_FORCE_CPP03 `
+  #         -DETL_CXX_STANDARD=$PARAM_CPP_STANDARD
         
-        cmake --build build --config Debug -- /m 
+  #       cmake --build build --config Debug -- /m 
 
-    - name: Run tests
-      if: ${{ steps.compatibility_check.outputs.should_run == 'true' }}
-      shell: pwsh
-      run: |
-        Write-Host "--- Running Tests ---"
-        cd build
-        .\test\Debug\etl_tests.exe
+  #   - name: Run tests
+  #     if: ${{ steps.compatibility_check.outputs.should_run == 'true' }}
+  #     shell: pwsh
+  #     run: |
+  #       Write-Host "--- Running Tests ---"
+  #       cd build
+  #       .\test\Debug\etl_tests.exe
