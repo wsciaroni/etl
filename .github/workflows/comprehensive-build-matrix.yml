@@ -12,19 +12,19 @@ jobs:
     runs-on: ubuntu-22.04
     container: ${{ matrix.compiler_config.image }}
     strategy:
-      fail-fast: true # As per your original file
+      fail-fast: true
       matrix:
         cpp_standard: ['03', '11', '14', '17', '20', '23']
         no_stl: ['ON', 'OFF']
         compiler_config:
-          # GCC versions
+          # GCC versions (assuming these are pulling correctly from Docker Hub)
           - { id: 'gcc9', image: 'gcc:9.5.0', cc: 'gcc', cxx: 'g++', supported_cpp_stds: ['03', '11', '14', '17'] }
           - { id: 'gcc11', image: 'gcc:11.4.0', cc: 'gcc', cxx: 'g++', supported_cpp_stds: ['03', '11', '14', '17', '20'] }
           - { id: 'gcc13', image: 'gcc:13.2.0', cc: 'gcc', cxx: 'g++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
-          # Clang versions - Updated image names
-          - { id: 'clang12', image: 'clangbuiltlinux/clang:12.0.1-focal', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20'] }
-          - { id: 'clang14', image: 'clangbuiltlinux/clang:14.0.6-jammy', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
-          - { id: 'clang17', image: 'clangbuiltlinux/clang:17.0.1-jammy', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
+          # Clang versions - Updated to use ghcr.io
+          - { id: 'clang12', image: 'ghcr.io/clangbuiltlinux/clang:12.0.1-focal', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20'] }
+          - { id: 'clang14', image: 'ghcr.io/clangbuiltlinux/clang:14.0.6-jammy', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
+          - { id: 'clang17', image: 'ghcr.io/clangbuiltlinux/clang:17.0.1-jammy', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
 
     steps:
     - name: Check C++ Standard Compatibility
@@ -37,9 +37,6 @@ jobs:
         echo "Compatibility check result: $is_supported"
         echo "should_run=$is_supported" >> $GITHUB_OUTPUT
 
-    # This step runs after the container is started and compatibility is checked.
-    # actions/checkout@v4 will run before this if placed later, or it can be placed here.
-    # For simplicity, let's assume checkout happens first implicitly or explicitly.
     - name: Checkout ETLCPP
       if: ${{ steps.compatibility_check.outputs.should_run == 'true' }}
       uses: actions/checkout@v4
@@ -47,11 +44,10 @@ jobs:
     - name: Install Build Essentials (CMake, make)
       if: ${{ steps.compatibility_check.outputs.should_run == 'true' }}
       run: |
-        echo "Updating package lists and installing CMake, make..."
+        echo "Updating package lists and installing CMake, make, ninja-build..."
         apt-get update -y
-        apt-get install -y --no-install-recommends cmake make ninja-build # ninja-build is optional but good for -G Ninja
-        echo "CMake and make installation complete."
-      # Note: clangbuiltlinux/clang images usually have these, but this ensures it for gcc images too.
+        apt-get install -y --no-install-recommends cmake make ninja-build
+        echo "Build essentials installation complete."
 
     - name: Configure and Build
       if: ${{ steps.compatibility_check.outputs.should_run == 'true' }}
@@ -69,7 +65,6 @@ jobs:
 
         echo "--- Configuration Details ---"
         echo "Compiler ID: ${{ matrix.compiler_config.id }}"
-        # The image is defined at the job level via matrix.compiler_config.image
         echo "C++ Standard (ETL_CXX_STANDARD): $PARAM_CPP_STANDARD"
         echo "NO_STL: ${{ matrix.no_stl }}"
         echo "ETL_FORCE_TEST_CPP03: $PARAM_ETL_FORCE_CPP03"
