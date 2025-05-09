@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-22.04
     container: ${{ matrix.compiler_config.image }}
     strategy:
-      fail-fast: false
+      fail-fast: true # As per your original file
       matrix:
         cpp_standard: ['03', '11', '14', '17', '20', '23']
         no_stl: ['ON', 'OFF']
@@ -21,10 +21,10 @@ jobs:
           - { id: 'gcc9', image: 'gcc:9.5.0', cc: 'gcc', cxx: 'g++', supported_cpp_stds: ['03', '11', '14', '17'] }
           - { id: 'gcc11', image: 'gcc:11.4.0', cc: 'gcc', cxx: 'g++', supported_cpp_stds: ['03', '11', '14', '17', '20'] }
           - { id: 'gcc13', image: 'gcc:13.2.0', cc: 'gcc', cxx: 'g++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
-          # Clang versions
-          - { id: 'clang12', image: 'clangbuiltlinux/ubuntu20.04-clang:12.0.1', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20'] }
-          - { id: 'clang14', image: 'clangbuiltlinux/ubuntu22.04-clang:14.0.6', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
-          - { id: 'clang17', image: 'clangbuiltlinux/ubuntu22.04-clang:17.0.1', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
+          # Clang versions - Updated image names
+          - { id: 'clang12', image: 'clangbuiltlinux/clang:12.0.1-focal', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20'] }
+          - { id: 'clang14', image: 'clangbuiltlinux/clang:14.0.6-jammy', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
+          - { id: 'clang17', image: 'clangbuiltlinux/clang:17.0.1-jammy', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
 
     steps:
     - name: Check C++ Standard Compatibility
@@ -37,9 +37,21 @@ jobs:
         echo "Compatibility check result: $is_supported"
         echo "should_run=$is_supported" >> $GITHUB_OUTPUT
 
+    # This step runs after the container is started and compatibility is checked.
+    # actions/checkout@v4 will run before this if placed later, or it can be placed here.
+    # For simplicity, let's assume checkout happens first implicitly or explicitly.
     - name: Checkout ETLCPP
       if: ${{ steps.compatibility_check.outputs.should_run == 'true' }}
       uses: actions/checkout@v4
+
+    - name: Install Build Essentials (CMake, make)
+      if: ${{ steps.compatibility_check.outputs.should_run == 'true' }}
+      run: |
+        echo "Updating package lists and installing CMake, make..."
+        apt-get update -y
+        apt-get install -y --no-install-recommends cmake make ninja-build # ninja-build is optional but good for -G Ninja
+        echo "CMake and make installation complete."
+      # Note: clangbuiltlinux/clang images usually have these, but this ensures it for gcc images too.
 
     - name: Configure and Build
       if: ${{ steps.compatibility_check.outputs.should_run == 'true' }}
@@ -57,7 +69,7 @@ jobs:
 
         echo "--- Configuration Details ---"
         echo "Compiler ID: ${{ matrix.compiler_config.id }}"
-        echo "Docker Image: ${{ matrix.compiler_config.image }}" # Using matrix.compiler_config.image as container is specified at job level
+        # The image is defined at the job level via matrix.compiler_config.image
         echo "C++ Standard (ETL_CXX_STANDARD): $PARAM_CPP_STANDARD"
         echo "NO_STL: ${{ matrix.no_stl }}"
         echo "ETL_FORCE_TEST_CPP03: $PARAM_ETL_FORCE_CPP03"
@@ -85,3 +97,71 @@ jobs:
         echo "--- Running Tests ---"
         cd build
         ./test/etl_tests
+
+  build-windows:
+    name: ${{ matrix.msvc_config.id }} | C++${{ matrix.cpp_standard }} | NO_STL=${{ matrix.no_stl }} | Windows
+    runs-on: ${{ matrix.msvc_config.runner }}
+    strategy:
+      fail-fast: true
+      matrix:
+        cpp_standard: ['03', '11', '14', '17', '20', '23']
+        no_stl: ['ON', 'OFF']
+        msvc_config:
+          - { id: 'msvc2019', runner: 'windows-2019', vs_cmake_generator: 'Visual Studio 16 2019', supported_cpp_stds: ['03', '11', '14', '17', '20'] }
+          - { id: 'msvc2022', runner: 'windows-2022', vs_cmake_generator: 'Visual Studio 17 2022', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
+    
+    steps:
+    - name: Check C++ Standard Compatibility
+      id: compatibility_check
+      shell: pwsh # Using PowerShell for this step
+      run: |
+        $isSupported = "${{ contains(matrix.msvc_config.supported_cpp_stds, matrix.cpp_standard) }}"
+        Write-Host "Compiler: ${{ matrix.msvc_config.id }}"
+        Write-Host "C++ Standard: ${{ matrix.cpp_standard }}"
+        Write-Host "Supported by this compiler: ${{ join(matrix.msvc_config.supported_cpp_stds, ', ') }}"
+        Write-Host "Compatibility check result: $isSupported"
+        "should_run=$isSupported" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+    - name: Checkout ETLCPP
+      if: ${{ steps.compatibility_check.outputs.should_run == 'true' }}
+      uses: actions/checkout@v4
+
+    - name: Configure and Build
+      if: ${{ steps.compatibility_check.outputs.should_run == 'true' }}
+      shell: pwsh
+      run: |
+        $PARAM_CPP_STANDARD = "${{ matrix.cpp_standard }}"
+        $PARAM_ETL_FORCE_CPP03 = "OFF"
+        if ( $PARAM_CPP_STANDARD -eq "03" ) {
+          $PARAM_ETL_FORCE_CPP03 = "ON"
+        }
+
+        Write-Host "--- Configuration Details ---"
+        Write-Host "Compiler ID: ${{ matrix.msvc_config.id }}"
+        Write-Host "Runner: ${{ matrix.msvc_config.runner }}"
+        Write-Host "C++ Standard (ETL_CXX_STANDARD): $PARAM_CPP_STANDARD"
+        Write-Host "NO_STL: ${{ matrix.no_stl }}"
+        Write-Host "ETL_FORCE_TEST_CPP03: $PARAM_ETL_FORCE_CPP03"
+        Write-Host "--- CMake Version ---"
+        cmake --version # CMake is available on GitHub Windows runners
+        Write-Host "---------------------------"
+
+        cmake -S . -B build `
+          -G "${{ matrix.msvc_config.vs_cmake_generator }}" `
+          -DCMAKE_BUILD_TYPE=Debug `
+          -DBUILD_TESTS=ON `
+          -DNO_STL=${{ matrix.no_stl }} `
+          -DETL_USE_TYPE_TRAITS_BUILTINS=OFF `
+          -DETL_USER_DEFINED_TYPE_TRAITS=OFF `
+          -DETL_FORCE_TEST_CPP03=$PARAM_ETL_FORCE_CPP03 `
+          -DETL_CXX_STANDARD=$PARAM_CPP_STANDARD
+        
+        cmake --build build --config Debug -- /m 
+
+    - name: Run tests
+      if: ${{ steps.compatibility_check.outputs.should_run == 'true' }}
+      shell: pwsh
+      run: |
+        Write-Host "--- Running Tests ---"
+        cd build
+        .\test\Debug\etl_tests.exe
