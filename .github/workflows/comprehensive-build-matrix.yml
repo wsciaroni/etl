@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-22.04
     container: ${{ matrix.compiler_config.image }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         cpp_standard: ['03', '11', '14', '17', '20', '23']
         no_stl: ['ON', 'OFF']
