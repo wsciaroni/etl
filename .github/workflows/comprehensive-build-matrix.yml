@@ -22,9 +22,10 @@ jobs:
           - { id: 'gcc11', image: 'gcc:11.4.0', cc: 'gcc', cxx: 'g++', supported_cpp_stds: ['03', '11', '14', '17', '20'] }
           - { id: 'gcc13', image: 'gcc:13.2.0', cc: 'gcc', cxx: 'g++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
           # Clang versions - Updated to use ghcr.io
-          - { id: 'clang12', image: 'ghcr.io/clangbuiltlinux/clang:12.0.1-focal', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20'] }
-          - { id: 'clang14', image: 'ghcr.io/clangbuiltlinux/clang:14.0.6-jammy', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
-          - { id: 'clang17', image: 'ghcr.io/clangbuiltlinux/clang:17.0.1-jammy', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
+          - { id: 'clang12', image: 'silkeh/clang:12', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20'] }
+          - { id: 'clang14', image: 'silkeh/clang:14', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
+          - { id: 'clang17', image: 'silkeh/clang:17', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
+          - { id: 'clang20', image: 'silkeh/clang:20', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
 
     steps:
     - name: Check C++ Standard Compatibility
