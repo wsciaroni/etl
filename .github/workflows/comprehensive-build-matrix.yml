@@ -24,7 +24,7 @@ jobs:
           - { id: 'gcc14', image: 'gcc:14', cc: 'gcc', cxx: 'g++', supported_cpp_stds: ['11', '14', '17', '20', '23'] }
           - { id: 'gcc15', image: 'gcc:15', cc: 'gcc', cxx: 'g++', supported_cpp_stds: ['11', '14', '17', '20', '23'] }
           # Clang versions - Updated to use ghcr.io
-          - { id: 'clang7', image: 'silkeh/clang:7', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['11', '14', '17', '20'] }
+          - { id: 'clang7', image: 'silkeh/clang:7', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['11', '14', '17'] }
           - { id: 'clang10', image: 'silkeh/clang:10', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['11', '14', '17', '20'] }
           - { id: 'clang12', image: 'silkeh/clang:12', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['11', '14', '17', '20'] }
           - { id: 'clang14', image: 'silkeh/clang:14', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['11', '14', '17', '20', '23'] }
