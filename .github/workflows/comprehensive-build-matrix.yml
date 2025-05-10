@@ -106,11 +106,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        cpp_standard: ['03', '11', '14', '17', '20', '23']
+        cpp_standard: ['11', '14', '17', '20', '23']
         no_stl: ['ON', 'OFF']
         msvc_config:
-          - { id: 'msvc2019', runner: 'windows-2019', vs_cmake_generator: 'Visual Studio 16 2019', supported_cpp_stds: ['03', '11', '14', '17', '20'] }
-          - { id: 'msvc2022', runner: 'windows-2022', vs_cmake_generator: 'Visual Studio 17 2022', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
+          - { id: 'msvc2019', runner: 'windows-2019', vs_cmake_generator: 'Visual Studio 16 2019', supported_cpp_stds: ['11', '14', '17', '20'] }
+          - { id: 'msvc2022', runner: 'windows-2022', vs_cmake_generator: 'Visual Studio 17 2022', supported_cpp_stds: ['11', '14', '17', '20', '23'] }
     
     steps:
     - name: Check C++ Standard Compatibility
