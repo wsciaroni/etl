@@ -83,7 +83,7 @@ jobs:
         echo "Compiler ID: ${{ matrix.compiler_config.id }}"
         echo "C++ Standard (ETL_CXX_STANDARD): $PARAM_CPP_STANDARD"
         echo "NO_STL: ${{ matrix.no_stl }}"
-        echo "ETL_FORCE_TEST_CPP03: $PARAM_ETL_FORCE_CPP03"
+        echo "ETL_FORCE_TEST_CPP03_IMPLEMENTATION: $PARAM_ETL_FORCE_CPP03"
         echo "CC: $CC, CXX: $CXX"
         echo "--- Compiler Version ---"
         $CXX --version
@@ -97,7 +97,7 @@ jobs:
           -DNO_STL=${{ matrix.no_stl }} \
           -DETL_USE_TYPE_TRAITS_BUILTINS=OFF \
           -DETL_USER_DEFINED_TYPE_TRAITS=OFF \
-          -DETL_FORCE_TEST_CPP03=$PARAM_ETL_FORCE_CPP03 \
+          -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=$PARAM_ETL_FORCE_CPP03 \
           -DETL_CXX_STANDARD=$PARAM_CPP_STANDARD
         
         cmake --build build -j $(nproc)
@@ -153,7 +153,7 @@ jobs:
         Write-Host "Runner: ${{ matrix.msvc_config.runner }}"
         Write-Host "C++ Standard (ETL_CXX_STANDARD): $PARAM_CPP_STANDARD"
         Write-Host "NO_STL: ${{ matrix.no_stl }}"
-        Write-Host "ETL_FORCE_TEST_CPP03: $PARAM_ETL_FORCE_CPP03"
+        Write-Host "ETL_FORCE_TEST_CPP03_IMPLEMENTATION: $PARAM_ETL_FORCE_CPP03"
         Write-Host "--- CMake Version ---"
         cmake --version # CMake is available on GitHub Windows runners
         Write-Host "---------------------------"
@@ -165,7 +165,7 @@ jobs:
           -DNO_STL=${{ matrix.no_stl }} `
           -DETL_USE_TYPE_TRAITS_BUILTINS=OFF `
           -DETL_USER_DEFINED_TYPE_TRAITS=OFF `
-          -DETL_FORCE_TEST_CPP03=$PARAM_ETL_FORCE_CPP03 `
+          -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=$PARAM_ETL_FORCE_CPP03 `
           -DETL_CXX_STANDARD=$PARAM_CPP_STANDARD
         
         cmake --build build --config Debug -- /m 
