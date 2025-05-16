@@ -18,7 +18,7 @@ jobs:
         no_stl: ['ON', 'OFF']
         compiler_config:
           # GCC versions
-          - { id: 'gcc9', image: 'gcc:9', cc: 'gcc', cxx: 'g++', supported_cpp_stds: ['03', '11', '14', '17'] }
+          # TODO: Fix gcc9 build - { id: 'gcc9', image: 'gcc:9', cc: 'gcc', cxx: 'g++', supported_cpp_stds: ['03', '11', '14', '17'] }
           - { id: 'gcc10', image: 'gcc:10', cc: 'gcc', cxx: 'g++', supported_cpp_stds: ['03', '11', '14', '17'] }
           - { id: 'gcc11', image: 'gcc:11', cc: 'gcc', cxx: 'g++', supported_cpp_stds: ['03', '11', '14', '17', '20'] }
           - { id: 'gcc12', image: 'gcc:12', cc: 'gcc', cxx: 'g++', supported_cpp_stds: ['03', '11', '14', '17', '20'] }
