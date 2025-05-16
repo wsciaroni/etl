@@ -1,0 +1,179 @@
+name: Comprehensive Build Matrix
+
+on:
+  push:
+    branches: [ master, development, pull-request/* ]
+  pull_request:
+    branches: [ master, pull-request/*, development ]
+
+jobs:
+  build-linux:
+    name: ${{ matrix.compiler_config.id }} | C++${{ matrix.cpp_standard }} | NO_STL=${{ matrix.no_stl }} | Linux
+    runs-on: ubuntu-22.04
+    container: ${{ matrix.compiler_config.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        cpp_standard: ['03', '11', '14', '17', '20', '23']
+        no_stl: ['ON', 'OFF']
+        compiler_config:
+          # GCC versions
+          # TODO: Fix gcc9 build - { id: 'gcc9', image: 'gcc:9', cc: 'gcc', cxx: 'g++', supported_cpp_stds: ['03', '11', '14', '17'] }
+          - { id: 'gcc10', image: 'gcc:10', cc: 'gcc', cxx: 'g++', supported_cpp_stds: ['03', '11', '14', '17'] }
+          - { id: 'gcc11', image: 'gcc:11', cc: 'gcc', cxx: 'g++', supported_cpp_stds: ['03', '11', '14', '17', '20'] }
+          - { id: 'gcc12', image: 'gcc:12', cc: 'gcc', cxx: 'g++', supported_cpp_stds: ['03', '11', '14', '17', '20'] }
+          - { id: 'gcc13', image: 'gcc:13', cc: 'gcc', cxx: 'g++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
+          - { id: 'gcc14', image: 'gcc:14', cc: 'gcc', cxx: 'g++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
+          - { id: 'gcc15', image: 'gcc:15', cc: 'gcc', cxx: 'g++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
+          # Clang versions
+          # TODO: Fix clang7 build - { id: 'clang7', image: 'silkeh/clang:7', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17'] }
+          # TODO: Fix clang8 build - { id: 'clang8', image: 'silkeh/clang:8', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17'] }
+          # TODO: Fix clang9 build - { id: 'clang9', image: 'silkeh/clang:9', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17'] }
+          - { id: 'clang10', image: 'silkeh/clang:10', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17'] } # TODO: Fix clang10 build for c++20
+          - { id: 'clang11', image: 'silkeh/clang:11', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17'] } # TODO: Fix clang11 build for c++20
+          - { id: 'clang12', image: 'silkeh/clang:12', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20'] }
+          - { id: 'clang13', image: 'silkeh/clang:13', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20'] }
+          - { id: 'clang14', image: 'silkeh/clang:14', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20'] }
+          - { id: 'clang15', image: 'silkeh/clang:15', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
+          - { id: 'clang16', image: 'silkeh/clang:16', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
+          - { id: 'clang17', image: 'silkeh/clang:17', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
+          - { id: 'clang18', image: 'silkeh/clang:18-bullseye', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] } # Uses -Bullseye, which appears to work for c++17 and newer
+          - { id: 'clang19', image: 'silkeh/clang:19-bullseye', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] } # Uses -Bullseye, which appears to work for c++17 and newer
+          - { id: 'clang20', image: 'silkeh/clang:20-bullseye', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] } # Uses -Bullseye, which appears to work for c++17 and newer
+
+    steps:
+    - name: Check C++ Standard Compatibility
+      id: compatibility_check
+      run: |
+        is_supported="${{ contains(matrix.compiler_config.supported_cpp_stds, matrix.cpp_standard) }}"
+        echo "Compiler: ${{ matrix.compiler_config.id }}"
+        echo "C++ Standard: ${{ matrix.cpp_standard }}"
+        echo "Supported by this compiler: ${{ join(matrix.compiler_config.supported_cpp_stds, ', ') }}"
+        echo "Compatibility check result: $is_supported"
+        echo "should_run=$is_supported" >> $GITHUB_OUTPUT
+
+    - name: Checkout ETLCPP
+      if: ${{ steps.compatibility_check.outputs.should_run == 'true' }}
+      uses: actions/checkout@v4
+
+    - name: Install Build Essentials (CMake, make)
+      if: ${{ steps.compatibility_check.outputs.should_run == 'true' }}
+      run: |
+        echo "Updating package lists and installing CMake, make, ninja-build..."
+        apt-get update -y
+        apt-get install -y --no-install-recommends cmake make ninja-build
+        echo "Build essentials installation complete."
+
+    - name: Configure and Build
+      if: ${{ steps.compatibility_check.outputs.should_run == 'true' }}
+      env:
+        ASAN_OPTIONS: "alloc_dealloc_mismatch=0,detect_leaks=0"
+      run: |
+        export CC=${{ matrix.compiler_config.cc }}
+        export CXX=${{ matrix.compiler_config.cxx }}
+        
+        PARAM_CPP_STANDARD=${{ matrix.cpp_standard }}
+        PARAM_ETL_FORCE_CPP03="OFF"
+        if [ "${{ matrix.cpp_standard }}" = "03" ]; then
+          PARAM_ETL_FORCE_CPP03="ON"
+          PARAM_CPP_STANDARD="11"
+        fi
+
+        echo "--- Configuration Details ---"
+        echo "Compiler ID: ${{ matrix.compiler_config.id }}"
+        echo "C++ Standard (ETL_CXX_STANDARD): $PARAM_CPP_STANDARD"
+        echo "NO_STL: ${{ matrix.no_stl }}"
+        echo "ETL_FORCE_TEST_CPP03_IMPLEMENTATION: $PARAM_ETL_FORCE_CPP03"
+        echo "CC: $CC, CXX: $CXX"
+        echo "--- Compiler Version ---"
+        $CXX --version
+        echo "--- CMake Version ---"
+        cmake --version
+        echo "---------------------------"
+
+        cmake -S . -B build \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DBUILD_TESTS=ON \
+          -DNO_STL=${{ matrix.no_stl }} \
+          -DETL_USE_TYPE_TRAITS_BUILTINS=OFF \
+          -DETL_USER_DEFINED_TYPE_TRAITS=OFF \
+          -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=$PARAM_ETL_FORCE_CPP03 \
+          -DETL_CXX_STANDARD=$PARAM_CPP_STANDARD
+        
+        cmake --build build -j $(nproc)
+
+    - name: Run tests
+      if: ${{ steps.compatibility_check.outputs.should_run == 'true' }}
+      run: |
+        echo "--- Running Tests ---"
+        cd build
+        ./test/etl_tests
+
+  build-windows:
+    name: ${{ matrix.msvc_config.id }} | C++${{ matrix.cpp_standard }} | NO_STL=${{ matrix.no_stl }} | Windows
+    runs-on: ${{ matrix.msvc_config.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        cpp_standard: ['03', '11', '14', '17', '20', '23']
+        no_stl: ['ON', 'OFF']
+        msvc_config:
+          # TODO: Fix the MSVC2019 builds - { id: 'msvc2019', runner: 'windows-2019', vs_cmake_generator: 'Visual Studio 16 2019', supported_cpp_stds: ['03', '11', '14', '17', '20'] }
+          - { id: 'msvc2022', runner: 'windows-2022', vs_cmake_generator: 'Visual Studio 17 2022', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
+    
+    steps:
+    - name: Check C++ Standard Compatibility
+      id: compatibility_check
+      shell: pwsh # Using PowerShell for this step
+      run: |
+        $isSupported = "${{ contains(matrix.msvc_config.supported_cpp_stds, matrix.cpp_standard) }}"
+        Write-Host "Compiler: ${{ matrix.msvc_config.id }}"
+        Write-Host "C++ Standard: ${{ matrix.cpp_standard }}"
+        Write-Host "Supported by this compiler: ${{ join(matrix.msvc_config.supported_cpp_stds, ', ') }}"
+        Write-Host "Compatibility check result: $isSupported"
+        "should_run=$isSupported" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+    - name: Checkout ETLCPP
+      if: ${{ steps.compatibility_check.outputs.should_run == 'true' }}
+      uses: actions/checkout@v4
+
+    - name: Configure and Build
+      if: ${{ steps.compatibility_check.outputs.should_run == 'true' }}
+      shell: pwsh
+      run: |
+        $PARAM_CPP_STANDARD = "${{ matrix.cpp_standard }}"
+        $PARAM_ETL_FORCE_CPP03 = "OFF"
+        if ( $PARAM_CPP_STANDARD -eq "03" ) {
+          $PARAM_ETL_FORCE_CPP03 = "ON"
+          $PARAM_CPP_STANDARD = "11"
+        }
+
+        Write-Host "--- Configuration Details ---"
+        Write-Host "Compiler ID: ${{ matrix.msvc_config.id }}"
+        Write-Host "Runner: ${{ matrix.msvc_config.runner }}"
+        Write-Host "C++ Standard (ETL_CXX_STANDARD): $PARAM_CPP_STANDARD"
+        Write-Host "NO_STL: ${{ matrix.no_stl }}"
+        Write-Host "ETL_FORCE_TEST_CPP03_IMPLEMENTATION: $PARAM_ETL_FORCE_CPP03"
+        Write-Host "--- CMake Version ---"
+        cmake --version # CMake is available on GitHub Windows runners
+        Write-Host "---------------------------"
+
+        cmake -S . -B build `
+          -G "${{ matrix.msvc_config.vs_cmake_generator }}" `
+          -DCMAKE_BUILD_TYPE=Debug `
+          -DBUILD_TESTS=ON `
+          -DNO_STL=${{ matrix.no_stl }} `
+          -DETL_USE_TYPE_TRAITS_BUILTINS=OFF `
+          -DETL_USER_DEFINED_TYPE_TRAITS=OFF `
+          -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=$PARAM_ETL_FORCE_CPP03 `
+          -DETL_CXX_STANDARD=$PARAM_CPP_STANDARD
+        
+        cmake --build build --config Debug -- /m 
+
+    - name: Run tests
+      if: ${{ steps.compatibility_check.outputs.should_run == 'true' }}
+      shell: pwsh
+      run: |
+        Write-Host "--- Running Tests ---"
+        cd build
+        .\test\Debug\etl_tests.exe
