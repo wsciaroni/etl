@@ -37,9 +37,9 @@ jobs:
           - { id: 'clang15', image: 'silkeh/clang:15', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
           - { id: 'clang16', image: 'silkeh/clang:16', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
           - { id: 'clang17', image: 'silkeh/clang:17', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] }
-          - { id: 'clang18', image: 'silkeh/clang:18', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14'] } # TODO: Fix clang18 build for c++17 and newer
-          - { id: 'clang19', image: 'silkeh/clang:19', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14'] } # TODO: Fix clang19 build for c++17 and newer
-          - { id: 'clang20', image: 'silkeh/clang:20', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14'] } # TODO: Fix clang20 build for c++17 and newer
+          - { id: 'clang18', image: 'silkeh/clang:18-bullseye', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] } # Uses -Bullseye, which appears to work for c++17 and newer
+          - { id: 'clang19', image: 'silkeh/clang:19-bullseye', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] } # Uses -Bullseye, which appears to work for c++17 and newer
+          - { id: 'clang20', image: 'silkeh/clang:20-bullseye', cc: 'clang', cxx: 'clang++', supported_cpp_stds: ['03', '11', '14', '17', '20', '23'] } # Uses -Bullseye, which appears to work for c++17 and newer
 
     steps:
     - name: Check C++ Standard Compatibility
