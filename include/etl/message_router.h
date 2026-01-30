@@ -567,7 +567,7 @@ namespace etl
     typedef etl::message_packet<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> message_packet;
 
   #if ETL_USING_CPP11
-    using message_types = etl::type_list<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> message_packet;
+    using message_types = etl::type_list<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>;
   #endif
 
     //**********************************************

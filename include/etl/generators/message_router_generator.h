@@ -595,7 +595,7 @@ namespace etl
       cog.out("  using message_types = etl::type_list<")
       for n in range(1, int(Handlers)):
           cog.out("T%s, " % n)
-      cog.outl("T%s> message_packet;" % int(Handlers))
+      cog.outl("T%s>;" % int(Handlers))
       cog.outl("#endif")
       cog.outl("")
 
