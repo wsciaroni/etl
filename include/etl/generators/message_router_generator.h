@@ -76,7 +76,7 @@ cog.outl("//********************************************************************
 #include "placement_new.h"
 #include "successor.h"
 #include "type_traits.h"
-
+#include "type_list.h"
 #include <stdint.h>
 
 namespace etl
@@ -574,8 +574,7 @@ namespace etl
       cog.outl("//***************************************************************************")
       cog.outl("template <typename TDerived,")
       cog.out("          ")
-      cog.out("typename T1, ")
-      for n in range(2, int(Handlers)):
+      for n in range(1, int(Handlers)):
           cog.out("typename T%s = void, " % n)
           if n % 4 == 0:
               cog.outl("")
@@ -589,8 +588,17 @@ namespace etl
       cog.out("  typedef etl::message_packet<")
       for n in range(1, int(Handlers)):
           cog.out("T%s, " % n)
-      cog.outl(" T%s> message_packet;" % int(Handlers))
+      cog.outl("T%s> message_packet;" % int(Handlers))
       cog.outl("")
+      
+      cog.outl("#if ETL_USING_CPP11")     
+      cog.out("  using message_types = etl::type_list<")
+      for n in range(1, int(Handlers)):
+          cog.out("T%s, " % n)
+      cog.outl("T%s> message_packet;" % int(Handlers))
+      cog.outl("#endif")
+      cog.outl("")
+
       cog.outl("  //**********************************************")
       cog.outl("  message_router(etl::message_router_id_t id_)")
       cog.outl("    : imessage_router(id_)")
@@ -765,6 +773,15 @@ namespace etl
               cog.out("T%s, " % t)
           cog.outl(" T%s> message_packet;" % n)
           cog.outl("")
+
+          cog.outl("#if ETL_USING_CPP11")     
+          cog.out("  using message_types = etl::type_list<")
+          for t in range(1, n):
+              cog.out("T%s, " % t)
+          cog.outl("T%s>;" % n)
+          cog.outl("#endif")
+          cog.outl("")
+
           cog.outl("  //**********************************************")
           cog.outl("  message_router(etl::message_router_id_t id_)")
           cog.outl("    : imessage_router(id_)")
