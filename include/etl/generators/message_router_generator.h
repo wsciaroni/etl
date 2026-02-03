@@ -625,7 +625,14 @@ namespace etl
 
     bool accepts(etl::message_id_t /*id*/) const ETL_OVERRIDE
     {
-      return false;
+      if (has_successor())
+      {
+        return get_successor().accepts(id);
+      }
+      else
+      {
+        return false;
+      }
     }
 
     //********************************************
