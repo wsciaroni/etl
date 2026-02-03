@@ -643,7 +643,7 @@ namespace etl
   };
 
   //***************************************************************************
-  /// Helper to turn etl::type_list<TTypes...> into etl::tuple<TTypes...>
+  /// Helper to turn etl::type_list<TTypes...> into etl::message_router<TTypes...>
   template <typename TDerived, typename TList>
   struct message_router_from_type_list;
 
