@@ -205,20 +205,19 @@ namespace etl
     virtual void visit(T1) = 0;
   };
 
-  //*****************************************************************
-  /// The visitor class for an etl::type_list.
-  /// Expands the type_list into the existing variadic visitor.
-  ///\ingroup visitor
-  //*****************************************************************
+  //***************************************************************************
+  /// Helper to turn etl::type_list<TTypes...> into etl::visitor<TTypes...>
+  template <typename TList>
+  struct visitor_from_type_list;
+
   template <typename... TTypes>
-  class visitor<etl::type_list<TTypes...>> : public visitor<TTypes...>
+  struct visitor_from_type_list<etl::type_list<TTypes...>>
   {
-    ETL_STATIC_ASSERT(sizeof...(TTypes) != 0, "etl::type_list must not be empty");
-
-  public:
-
-    using visitor<TTypes...>::visit;
+    using type = etl::visitor<TTypes...>;
   };
+
+  template <typename TTypeList>
+  using visitor_from_type_list_t = typename visitor_from_type_list<TTypeList>::type;
 
 #else
 
