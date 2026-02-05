@@ -404,7 +404,7 @@ namespace etl
   private:
 
     template <typename T>
-    static constexpr bool IsMessagePacket = etl::is_same_v<etl::remove_const_t<etl::remove_reference_t<T>>, etl::message_packet<TMessageTypes...>>;
+    static constexpr bool IsMessagePacket = etl::is_same_v<etl::remove_const_t<etl::remove_reference_t<T>>, etl::message_packet<>>;
 
     template <typename T>
     static constexpr bool IsInMessageList = false;
