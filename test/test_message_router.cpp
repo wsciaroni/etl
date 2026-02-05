@@ -448,31 +448,6 @@ namespace
       CHECK_EQUAL(1, r1.message4_count);
       CHECK_EQUAL(0, r1.message_unknown_count);
       CHECK_EQUAL(4, r2.callback_count);
-
-      //// Send from the null router.
-      //etl::send_message(r0, message1);
-      //CHECK_EQUAL(1, r2.message1_count);
-      //CHECK_EQUAL(0, r2.message2_count);
-      //CHECK_EQUAL(0, r2.message4_count);
-      //CHECK_EQUAL(0, r2.message_unknown_count);
-
-      //etl::send_message(r0, message2);
-      //CHECK_EQUAL(1, r2.message1_count);
-      //CHECK_EQUAL(1, r2.message2_count);
-      //CHECK_EQUAL(0, r2.message4_count);
-      //CHECK_EQUAL(0, r2.message_unknown_count);
-
-      //etl::send_message(r0, message3);
-      //CHECK_EQUAL(1, r2.message1_count);
-      //CHECK_EQUAL(1, r2.message2_count);
-      //CHECK_EQUAL(0, r2.message4_count);
-      //CHECK_EQUAL(1, r2.message_unknown_count);
-
-      //etl::send_message(r0, message4);
-      //CHECK_EQUAL(1, r2.message1_count);
-      //CHECK_EQUAL(1, r2.message2_count);
-      //CHECK_EQUAL(1, r2.message4_count);
-      //CHECK_EQUAL(1, r2.message_unknown_count);
     }
 
     //*************************************************************************

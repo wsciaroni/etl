@@ -76,13 +76,13 @@ namespace etl
   private:
 
     template <typename T>
-    static constexpr bool IsMessagePacket = etl::is_same_v< etl::remove_const_t<etl::remove_reference_t<T>>, etl::message_packet<TMessageTypes...>>;
+    static constexpr bool IsMessagePacket = etl::is_same_v<etl::remove_const_t<etl::remove_reference_t<T>>, etl::message_packet<TMessageTypes...>>;
 
     template <typename T>
     static constexpr bool IsInMessageList = etl::is_one_of_v<etl::remove_const_t<etl::remove_reference_t<T>>, TMessageTypes...>;
 
     template <typename T>
-    static constexpr bool IsIMessage = etl::is_same_v<remove_const_t<etl::remove_reference_t<T>>, etl::imessage>;
+    static constexpr bool IsIMessage = etl::is_same_v<etl::remove_const_t<etl::remove_reference_t<T>>, etl::imessage>;
 
   public:
 
@@ -90,7 +90,7 @@ namespace etl
 
     //********************************************
 #include "private/diagnostic_uninitialized_push.h"
-    message_packet()
+    constexpr message_packet() noexcept
       : valid(false)
     {
     }
@@ -391,14 +391,14 @@ namespace etl
   {
   private:
 
-    //template <typename T>
-    //static constexpr bool IsMessagePacket = etl::is_same_v< etl::remove_const_t<etl::remove_reference_t<T>>, etl::message_packet<TMessageTypes...>>;
+    template <typename T>
+    static constexpr bool IsMessagePacket = etl::is_same_v<etl::remove_const_t<etl::remove_reference_t<T>>, etl::message_packet<TMessageTypes...>>;
 
     template <typename T>
     static constexpr bool IsInMessageList = false;
 
     template <typename T>
-    static constexpr bool IsIMessage = etl::is_same_v<remove_const_t<etl::remove_reference_t<T>>, etl::imessage>;
+    static constexpr bool IsIMessage = etl::is_same_v<etl::remove_const_t<etl::remove_reference_t<T>>, etl::imessage>;
 
   public:
 
@@ -406,7 +406,7 @@ namespace etl
 
     //********************************************
 #include "private/diagnostic_uninitialized_push.h"
-    message_packet()
+    constexpr message_packet() noexcept
     {
     }
 #include "private/diagnostic_pop.h"
@@ -528,7 +528,7 @@ namespace etl
 
     //********************************************
   #include "private/diagnostic_uninitialized_push.h"
-    message_packet()
+    ETL_CONSTEXPR message_packet() ETL_NOEXCEPT
       : valid(false)
     {
     }
@@ -856,7 +856,7 @@ namespace etl
 
     //********************************************
   #include "private/diagnostic_uninitialized_push.h"
-    message_packet()
+    ETL_CONSTEXPR message_packet() ETL_NOEXCEPT
       : valid(false)
     {
     }
@@ -1182,7 +1182,7 @@ namespace etl
 
     //********************************************
   #include "private/diagnostic_uninitialized_push.h"
-    message_packet()
+    ETL_CONSTEXPR message_packet() ETL_NOEXCEPT
       : valid(false)
     {
     }
@@ -1505,7 +1505,7 @@ namespace etl
 
     //********************************************
   #include "private/diagnostic_uninitialized_push.h"
-    message_packet()
+    ETL_CONSTEXPR message_packet() ETL_NOEXCEPT
       : valid(false)
     {
     }
@@ -1824,7 +1824,7 @@ namespace etl
 
     //********************************************
   #include "private/diagnostic_uninitialized_push.h"
-    message_packet()
+    ETL_CONSTEXPR message_packet() ETL_NOEXCEPT
       : valid(false)
     {
     }
@@ -2137,7 +2137,7 @@ namespace etl
 
     //********************************************
   #include "private/diagnostic_uninitialized_push.h"
-    message_packet()
+    ETL_CONSTEXPR message_packet() ETL_NOEXCEPT
       : valid(false)
     {
     }
@@ -2447,7 +2447,7 @@ namespace etl
 
     //********************************************
   #include "private/diagnostic_uninitialized_push.h"
-    message_packet()
+    ETL_CONSTEXPR message_packet() ETL_NOEXCEPT
       : valid(false)
     {
     }
@@ -2754,7 +2754,7 @@ namespace etl
 
     //********************************************
   #include "private/diagnostic_uninitialized_push.h"
-    message_packet()
+    ETL_CONSTEXPR message_packet() ETL_NOEXCEPT
       : valid(false)
     {
     }
@@ -3057,7 +3057,7 @@ namespace etl
 
     //********************************************
   #include "private/diagnostic_uninitialized_push.h"
-    message_packet()
+    ETL_CONSTEXPR message_packet() ETL_NOEXCEPT
       : valid(false)
     {
     }
@@ -3354,7 +3354,7 @@ namespace etl
 
     //********************************************
   #include "private/diagnostic_uninitialized_push.h"
-    message_packet()
+    ETL_CONSTEXPR message_packet() ETL_NOEXCEPT
       : valid(false)
     {
     }
@@ -3648,7 +3648,7 @@ namespace etl
 
     //********************************************
   #include "private/diagnostic_uninitialized_push.h"
-    message_packet()
+    ETL_CONSTEXPR message_packet() ETL_NOEXCEPT
       : valid(false)
     {
     }
@@ -3939,7 +3939,7 @@ namespace etl
 
     //********************************************
   #include "private/diagnostic_uninitialized_push.h"
-    message_packet()
+    ETL_CONSTEXPR message_packet() ETL_NOEXCEPT
       : valid(false)
     {
     }
@@ -4226,7 +4226,7 @@ namespace etl
 
     //********************************************
   #include "private/diagnostic_uninitialized_push.h"
-    message_packet()
+    ETL_CONSTEXPR message_packet() ETL_NOEXCEPT
       : valid(false)
     {
     }
@@ -4507,7 +4507,7 @@ namespace etl
 
     //********************************************
   #include "private/diagnostic_uninitialized_push.h"
-    message_packet()
+    ETL_CONSTEXPR message_packet() ETL_NOEXCEPT
       : valid(false)
     {
     }
@@ -4785,7 +4785,7 @@ namespace etl
 
     //********************************************
   #include "private/diagnostic_uninitialized_push.h"
-    message_packet()
+    ETL_CONSTEXPR message_packet() ETL_NOEXCEPT
       : valid(false)
     {
     }
@@ -5060,7 +5060,7 @@ namespace etl
 
     //********************************************
   #include "private/diagnostic_uninitialized_push.h"
-    message_packet()
+    ETL_CONSTEXPR message_packet() ETL_NOEXCEPT
       : valid(false)
     {
     }
@@ -5331,7 +5331,7 @@ namespace etl
     using message_types = etl::type_list<>;
 #endif
 
-    message_packet()
+    ETL_CONSTEXPR message_packet() ETL_NOEXCEPT
       : valid(false)
     {
     }

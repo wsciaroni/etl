@@ -623,7 +623,7 @@ namespace etl
     //**********************************************
     using imessage_router::accepts;
 
-    bool accepts(etl::message_id_t /*id*/) const ETL_OVERRIDE
+    bool accepts(etl::message_id_t id) const ETL_OVERRIDE
     {
       if (has_successor())
       {
