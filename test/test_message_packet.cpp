@@ -235,7 +235,6 @@ namespace
 #else
       Packet packet3(message3);
 #endif
-      NullPacket null_packet;
 
       // Should cause a static assert.
       //Packet packet4(message4);
