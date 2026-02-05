@@ -1255,7 +1255,7 @@ namespace etl
     get(etl::variant<TTypes...>& v)
   {
 #if ETL_USING_CPP17 && !defined(ETL_VARIANT_FORCE_CPP11)
-    static_assert(Index < etl::type_list_size<etl::type_list<TTypes...>>::value, "Index out of range");
+    static_assert(Index < sizeof...(TTypes), "Index out of range");
 #endif
 
     ETL_ASSERT(Index == v.index(), ETL_ERROR(etl::variant_incorrect_type_exception));
@@ -1428,7 +1428,7 @@ namespace etl
 
   template <typename... TTypes>
   struct variant_size<etl::variant<TTypes...>>
-    : etl::integral_constant<size_t, etl::type_list_size<etl::type_list<TTypes...>>::value>
+    : etl::integral_constant<size_t, sizeof...(TTypes)>
   {
   };
 
