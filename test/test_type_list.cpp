@@ -35,6 +35,17 @@ SOFTWARE.
 namespace
 {
 #if ETL_USING_CPP11
+
+  struct A { static constexpr int id = 0; };
+  struct B { static constexpr int id = 1; };
+  struct C { static constexpr int id = 2; };
+
+  // Convenience comparator for types that expose a constexpr integral ID (ascending)
+  template <typename T1, typename T2>
+  struct by_asencding_id : etl::bool_constant<(T1::id < T2::id)>
+  {
+  };
+
   SUITE(test_type_list)
   {
     //*************************************************************************
@@ -278,6 +289,114 @@ namespace
       // Uncomment to generate static_assert error.
       //CHECK_FALSE((etl::type_lists_are_convertible_v<t1, t5>));
 #endif
+    }
+
+    //*************************************************************************
+    TEST(test_type_list_sort_empty_list)
+    {
+      using list     = etl::type_list<>;
+      using result   = etl::type_list_sort_t<list, by_asencding_id>;
+      using expected = etl::type_list<>;
+
+      CHECK((etl::is_same<result, expected>::value));
+      CHECK_EQUAL(0U, etl::type_list_size<result>::value);
+    }
+
+    //*************************************************************************
+    TEST(test_type_list_sort_single_list)
+    {
+      using list     = etl::type_list<A>;
+      using result   = etl::type_list_sort_t<list, by_asencding_id>;
+      using expected = etl::type_list<A>;
+
+      CHECK((etl::is_same<result, expected>::value));
+      CHECK_EQUAL(1U, etl::type_list_size<result>::value);
+    }
+
+    //*************************************************************************
+    TEST(test_type_list_sort_multiple_list)
+    {
+      using list     = etl::type_list<B, C, A>;
+      using result   = etl::type_list_sort_t<list, by_asencding_id>;
+      using expected = etl::type_list<A, B, C>;
+
+      CHECK((etl::is_same<result, expected>::value));
+      CHECK_EQUAL(3U, etl::type_list_size<result>::value);
+    }
+
+    //*************************************************************************
+    TEST(test_type_list_prepend_to_empty_list)
+    {
+      using list     = etl::type_list<>;
+      using result   = etl::type_list_prepend_t<list, A>;
+      using expected = etl::type_list<A>;
+
+      CHECK((etl::is_same<result, expected>::value));
+      CHECK_EQUAL(1U, etl::type_list_size<result>::value);
+    }
+
+    //*************************************************************************
+    TEST(test_type_list_prepend_to_non_empty_list)
+    {
+      using list     = etl::type_list<B, C>;
+      using result   = etl::type_list_prepend_t<list, A>;
+      using expected = etl::type_list<A, B, C>;
+
+      CHECK((etl::is_same<result, expected>::value));
+      CHECK_EQUAL(3U, etl::type_list_size<result>::value);
+    }
+
+    //*************************************************************************
+    TEST(test_type_list_append_to_empty_list)
+    {
+      using list = etl::type_list<>;
+      using result   = etl::type_list_append_t<list, A>;
+      using expected = etl::type_list<A>;
+
+      CHECK((etl::is_same<result, expected>::value));
+      CHECK_EQUAL(1U, etl::type_list_size<result>::value);
+    }
+
+    //*************************************************************************
+    TEST(test_type_list_append_to_non_empty_list)
+    {
+      using list     = etl::type_list<A, B>;
+      using result   = etl::type_list_append_t<list, C>;
+      using expected = etl::type_list<A, B, C>;
+
+      CHECK((etl::is_same<result, expected>::value));
+      CHECK_EQUAL(3U, etl::type_list_size<result>::value);
+    }
+
+    //*************************************************************************
+    TEST(test_type_list_insert_to_empty_list)
+    {
+      using list     = etl::type_list<>;
+      using result   = etl::type_list_insert_t<list, A, 0>;
+      using expected = etl::type_list<A>;
+
+      CHECK((etl::is_same<result, expected>::value));
+      //CHECK_EQUAL(1U, etl::type_list_size<result>::value);
+    }
+
+    //*************************************************************************
+    TEST(test_type_list_insert_to_non_empty_list)
+    {
+      using list     = etl::type_list<A, B>;
+      using result1  = etl::type_list_insert_t<list, C, 0>;
+      using result2  = etl::type_list_insert_t<list, C, 1>;
+      using result3  = etl::type_list_insert_t<list, C, 2>;
+      using expected1 = etl::type_list<C, A, B>;
+      using expected2 = etl::type_list<A, C, B>;
+      using expected3 = etl::type_list<A, B, C>;
+
+      CHECK((etl::is_same<result1, expected1>::value));
+      CHECK((etl::is_same<result2, expected2>::value));
+      CHECK((etl::is_same<result3, expected3>::value));
+      
+      //CHECK_EQUAL(3U, etl::type_list_size<result1>::value);
+      //CHECK_EQUAL(3U, etl::type_list_size<result2>::value);
+      //CHECK_EQUAL(3U, etl::type_list_size<result3>::value);
     }
   }
 #endif

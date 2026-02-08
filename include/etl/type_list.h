@@ -48,11 +48,14 @@ namespace etl
   static ETL_CONSTANT size_t type_list_npos = etl::integral_limits<size_t>::max;
 
   //***************************************************************************
-  /// Type list forward declaration.
+  // Type list forward declaration.
   //***************************************************************************
   template <typename... TTypes>
   struct type_list;
 
+  //***************************************************************************
+  /// Check if a type is an etl::type_list.
+  //***************************************************************************
   template <typename T>
   struct is_type_list : etl::false_type {};
 
@@ -154,8 +157,8 @@ namespace etl
   template <typename TTypeList, size_t Index>
   struct type_list_type_at_index
   {
-    ETL_STATIC_ASSERT(Index < type_list_size<TTypeList>::value,              "etl::type_list_type_at_index out of range");
-    ETL_STATIC_ASSERT((etl::is_base_of<etl::type_list<>, TTypeList>::value), "TTypeList must be an etl::type_list");
+    ETL_STATIC_ASSERT(Index < type_list_size<TTypeList>::value, "etl::type_list_type_at_index out of range");
+    ETL_STATIC_ASSERT((etl::is_type_list<TTypeList>::value),    "TTypeList must be an etl::type_list");
 
     using type = typename type_list_type_at_index<typename TTypeList::tail, Index - 1>::type;
   };
@@ -163,6 +166,8 @@ namespace etl
   template <typename TTypeList>
   struct type_list_type_at_index<TTypeList, 0>
   {
+    ETL_STATIC_ASSERT((etl::is_type_list<TTypeList>::value),    "TTypeList must be an etl::type_list");
+
     using type = typename TTypeList::head;
   };
 
@@ -179,7 +184,7 @@ namespace etl
                                             (type_list_index_of_type<typename TTypeList::tail, T>::value == etl::type_list_npos ? etl::type_list_npos : 
                                                                                                                                   type_list_index_of_type<typename TTypeList::tail, T>::value + 1)>
   {
-    ETL_STATIC_ASSERT((etl::is_base_of<etl::type_list<>, TTypeList>::value), "TTypeList must be an etl::type_list");
+    ETL_STATIC_ASSERT((etl::is_type_list<TTypeList>::value),    "TTypeList must be an etl::type_list");
   };
 
   template <typename T>
@@ -316,13 +321,30 @@ namespace etl
   template <typename TTypeList, size_t... Indices>
   struct type_list_select
   {
-    ETL_STATIC_ASSERT((etl::is_base_of<etl::type_list<>, TTypeList>::value), "TTypeList must be an etl::type_list");
+    ETL_STATIC_ASSERT((etl::is_type_list<TTypeList>::value), "TTypeList must be an etl::type_list");
 
     using type = type_list<type_list_type_at_index_t<TTypeList, Indices>...>;
   };
 
   template <typename TTypeList, size_t... Indices>
   using type_list_select_t = typename type_list_select<TTypeList, Indices...>::type;
+
+  //***************************************************************************
+  /// Declares a new type_list by selecting types from a given type_list, according to an index sequence.
+  //***************************************************************************
+  template <typename TTypeList, typename TIndexSequence>
+  struct type_list_select_from_sequence;
+
+  template <typename TTypeList, size_t... Indices>
+  struct type_list_select_from_sequence<TTypeList, etl::index_sequence<Indices...>>
+  {
+    using type = etl::type_list_select_t<TTypeList, Indices...>;
+  };
+
+#if ETL_USING_CPP11
+  template <typename TTypeList, typename TIndexSequence>
+  using type_list_select_from_sequence_t = typename type_list_select_from_sequence<TTypeList, TIndexSequence>::type;
+#endif
 
   //***************************************************************************
   /// Concatenates two or more type_lists.
@@ -344,6 +366,78 @@ namespace etl
 
   template <typename... TypeLists>
   using type_list_cat_t = typename type_list_cat<TypeLists...>::type;
+
+  //***************************************************************************
+  /// Prepend a type to a type_list.
+  //***************************************************************************
+  template <typename T, typename... TTypes>
+  struct type_list_prepend;
+
+  template <typename T, typename... TTypes>
+  struct type_list_prepend<etl::type_list<TTypes...>, T>
+  {
+    using type = type_list<T, TTypes...>;
+  };
+
+  template <typename T>
+  struct type_list_prepend<T>
+  {
+    using type = etl::type_list<T>;
+  };
+
+  template <typename TypeList, typename T>
+  using type_list_prepend_t = typename type_list_prepend<TypeList, T>::type;
+
+  //***************************************************************************
+  /// Append a type to a type_list.
+  //***************************************************************************
+  template <typename T, typename... TTypes>
+  struct type_list_append;
+
+  template <typename T, typename... TTypes>
+  struct type_list_append<etl::type_list<TTypes...>, T>
+  {
+    using type = type_list<TTypes..., T>;
+  };
+
+  template <typename T>
+  struct type_list_append<T>
+  {
+    using type = etl::type_list<T>;
+  };
+
+  template <typename TypeList, typename T>
+  using type_list_append_t = typename type_list_append<TypeList, T>::type;
+
+  //***************************************************************************
+  /// Insert a type at an index in a type_list.
+  /// Inserts before the type currently at Index.
+  /// If Index == size of the type_list, the type is appended.
+  //***************************************************************************
+  template <typename TTypeList, typename T, size_t Index>
+  struct type_list_insert
+  {
+  private:
+
+    ETL_STATIC_ASSERT((etl::is_type_list<TTypeList>::value),          "TTypeList must be an etl::type_list");
+    ETL_STATIC_ASSERT(Index <= etl::type_list_size<TTypeList>::value, "Index out of range");
+
+    using index_sequence_for_prefix = etl::make_index_sequence<Index>;
+    using index_sequence_for_suffix = etl::make_index_sequence_with_offset<Index, etl::type_list_size<TTypeList>::value - Index>;
+
+    using prefix = etl::type_list_select_from_sequence_t<TTypeList, index_sequence_for_prefix>;
+    using suffix = etl::type_list_select_from_sequence_t<TTypeList, index_sequence_for_suffix>;
+
+  public:
+
+    // Concatenate the prefix, new type, and suffix to create the new type list with T inserted at the correct position.
+    using type = etl::type_list_cat_t<prefix, etl::type_list<T>, suffix>;
+  };
+
+#if ETL_USING_CPP11
+  template <typename TTypeList, typename T, size_t Index>
+  using type_list_insert_t = typename etl::type_list_insert<TTypeList, T, Index>::type;
+#endif
 
   //***************************************************************************
   /// Checks that two type lists are convertible.
@@ -372,6 +466,175 @@ namespace etl
 #if ETL_USING_CPP17
   template <typename TFromList, typename TToList>
   inline constexpr bool type_lists_are_convertible_v = etl::type_lists_are_convertible<TFromList, TToList>::value;
+#endif
+
+  namespace private_type_list
+  {
+    //*********************************
+    template <typename TTypeList, template <typename, typename> class TCompare>
+    struct type_list_is_sorted_impl;
+
+    //*********************************
+    // Empty list is sorted
+    template <template <typename, typename> class TCompare>
+    struct type_list_is_sorted_impl<etl::type_list<>, TCompare>
+      : etl::true_type
+    {
+    };
+
+    //*********************************
+    // Single element list is sorted
+    template <typename T0, template <typename, typename> class TCompare>
+    struct type_list_is_sorted_impl<etl::type_list<T0>, TCompare>
+      : etl::true_type
+    {
+    };
+
+    //*********************************
+    // Ensure that the list is sorted.
+    // Recursively the head to the next to ensure that the list is sorted.
+    template <typename Head, typename Next, typename... Tail, template <typename, typename> class TCompare>
+    struct type_list_is_sorted_impl<etl::type_list<Head, Next, Tail...>, TCompare>
+      : etl::bool_constant<!TCompare<Next, Head>::value &&
+                           type_list_is_sorted_impl<etl::type_list<Next, Tail...>, TCompare>::value>
+    {
+    };
+  }
+
+  //*****************************************************************************
+  /// Checks if a type_list is sorted according to TCompare
+  /// Static asserts if TTypeList is not an etl::type_list.
+  /// Comparator must be: template <typename A, typename B> struct Compare : etl::bool_constant<...> {};
+  //*****************************************************************************
+  template <typename TTypeList, template <typename, typename> class TCompare>
+  struct type_list_is_sorted : public private_type_list::type_list_is_sorted_impl<TTypeList, TCompare>
+  {
+    ETL_STATIC_ASSERT((etl::is_type_list<TTypeList>::value), "TTypeList must be an etl::type_list");
+  };
+
+#if ETL_USING_CPP17
+  template <typename TTypeList, template <typename, typename> class TCompare>
+  inline constexpr bool type_list_is_sorted_v = etl::type_list_is_sorted<TTypeList, TCompare>::value;
+#endif
+
+  //*****************************************************************************
+  namespace private_type_list
+  {   
+    //*********************************
+    template <bool InsertBefore, typename Head, typename T, template <typename, typename> class TCompare, typename... Tail>
+    struct insert_sorted_impl;
+
+    //*********************************
+    template <typename TSortedList, typename T, template <typename, typename> class TCompare>
+    struct type_list_insert_sorted_impl;
+
+    //*********************************
+    // Insert T into sorted list using TCompare
+    // Empty list -> T becomes the list
+    template <typename T, template <typename, typename> class TCompare>
+    struct type_list_insert_sorted_impl<etl::type_list<>, T, TCompare>
+    {
+      using type = etl::type_list<T>;
+    };
+
+    //*********************************
+    // Insert T into the correct position in the sorted list, as determined by TCompare
+    template <typename Head, typename... Tail, typename T, template <typename, typename> class TCompare>
+    struct type_list_insert_sorted_impl<etl::type_list<Head, Tail...>, T, TCompare>
+    {
+      using type = typename insert_sorted_impl<TCompare<T, Head>::value,
+        Head,
+        T,
+        TCompare,
+        Tail...>::type;
+    };
+
+    //*********************************
+    // If InsertBefore is true, then T should be inserted before Head
+    template <typename Head, typename T, template <typename, typename> class TCompare, typename... Tail>
+    struct insert_sorted_impl<true, Head, T, TCompare, Tail...>
+    {
+      using type = etl::type_list<T, Head, Tail...>;
+    };
+
+    //*********************************
+    // If InsertBefore is false, then T should be inserted after Head, so we recursively call insert_sorted_impl on the tail of the list
+    template <typename Head, typename T, template <typename, typename> class TCompare, typename... Tail>
+    struct insert_sorted_impl<false, Head, T, TCompare, Tail...>
+    {
+      using type = etl::type_list_prepend_t<typename type_list_insert_sorted_impl<etl::type_list<Tail...>, T, TCompare>::type, Head>;
+    };
+  }
+
+  //*****************************************************************************
+  /// Insert T into the correct position in the sorted list, as determined by TCompare
+  /// Static asserts if TTypeList is not sorted according to TCompare.
+  /// Comparator must be: template <typename A, typename B> struct Compare : etl::bool_constant<...> {};
+  //*****************************************************************************
+  template <typename TTypeList, typename T, template <typename, typename> class TCompare>
+  struct type_list_insert_sorted : public private_type_list::type_list_insert_sorted_impl<TTypeList, T, TCompare>
+  {
+    ETL_STATIC_ASSERT((etl::is_type_list<TTypeList>::value),                  "TTypeList must be an etl::type_list");
+    ETL_STATIC_ASSERT((etl::type_list_is_sorted<TTypeList, TCompare>::value), "Cannot insert into a non-sorted type list");
+  };
+
+#if ETL_USING_CPP11
+  template <typename TTypeList, typename T, template <typename, typename> class TCompare>
+  using type_list_insert_sorted_t = typename etl::type_list_insert_sorted<TTypeList, T, TCompare>::type;
+#endif
+
+  //***************************************************************************
+  namespace private_type_list
+  {
+    //*********************************
+    // Forward declaration
+    template <typename TTypeList, template <typename, typename> class TCompare>
+    struct type_list_sort_impl;
+
+    //*********************************
+    // Empty list
+    template <template <typename, typename> class TCompare>
+    struct type_list_sort_impl<etl::type_list<>, TCompare>
+    {
+      using type = etl::type_list<>;
+    };
+
+    //*********************************
+    // Single element list
+    template <typename T0, template <typename, typename> class TCompare>
+    struct type_list_sort_impl<etl::type_list<T0>, TCompare>
+    {
+      using type = etl::type_list<T0>;
+    };
+
+    //*********************************
+    // Define a new type_list by sorting the types according to TCompare
+    template <typename Head, typename... Tail, template <typename, typename> class TCompare>
+    struct type_list_sort_impl<etl::type_list<Head, Tail...>, TCompare>
+    {
+    private:
+
+      using sorted_tail = typename type_list_sort_impl<etl::type_list<Tail...>, TCompare>::type;
+
+    public:
+
+      using type = typename etl::type_list_insert_sorted<sorted_tail, Head, TCompare>::type;
+    };
+  }
+
+  //*****************************************************************************
+  /// etl::type_list sorting by a user-supplied type comparator
+  /// Comparator must be: template <typename A, typename B> struct Compare : etl::bool_constant<...> {};
+  //*****************************************************************************
+  template <typename TTypeList, template <typename, typename> class TCompare>
+  struct type_list_sort : public private_type_list::type_list_sort_impl<TTypeList, TCompare>
+  {
+    ETL_STATIC_ASSERT((etl::is_type_list<TTypeList>::value), "TTypeList must be an etl::type_list");
+  };
+
+#if ETL_USING_CPP11
+  template <typename TTypeList, template <typename, typename> class TCompare>
+  using type_list_sort_t = typename etl::type_list_sort<TTypeList, TCompare>::type;
 #endif
 }
 #endif

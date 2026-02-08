@@ -559,11 +559,28 @@ namespace etl
     {
       using type = etl::integer_sequence<size_t, Indices...>;
     };
+
+    template <size_t Offset, typename IndexSeq>
+    struct offset_index_sequence;
+
+    template <size_t Offset, size_t... Indices>
+    struct offset_index_sequence<Offset, etl::integer_sequence<size_t, Indices...>>
+    {
+      using type = etl::integer_sequence<size_t, (Offset + Indices)...>;
+    };
   }
 
   //***********************************
+  /// Make an integer sequence.
+  //***********************************
   template <size_t Count>
   using make_index_sequence = typename private_integer_sequence::make_index_sequence<Count, etl::integer_sequence<size_t>>::type;
+
+  //***********************************
+  ///  Make an integer sequence with an offset.
+  //***********************************
+  template <size_t Offset, size_t Count>
+  using make_index_sequence_with_offset = typename private_integer_sequence::offset_index_sequence<Offset, etl::make_index_sequence<Count>>::type;
 
   //***********************************
   // Helper to support both parameter packs and etl::type_list<T...>
