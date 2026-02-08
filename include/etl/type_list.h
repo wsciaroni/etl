@@ -333,18 +333,16 @@ namespace etl
   /// Declares a new type_list by selecting types from a given type_list, according to an index sequence.
   //***************************************************************************
   template <typename TTypeList, typename TIndexSequence>
-  struct type_list_select_from_sequence;
+  struct type_list_select_from_index_sequence;
 
   template <typename TTypeList, size_t... Indices>
-  struct type_list_select_from_sequence<TTypeList, etl::index_sequence<Indices...>>
+  struct type_list_select_from_index_sequence<TTypeList, etl::index_sequence<Indices...>>
   {
     using type = etl::type_list_select_t<TTypeList, Indices...>;
   };
 
-#if ETL_USING_CPP11
   template <typename TTypeList, typename TIndexSequence>
-  using type_list_select_from_sequence_t = typename type_list_select_from_sequence<TTypeList, TIndexSequence>::type;
-#endif
+  using type_list_select_from_index_sequence_t = typename type_list_select_from_index_sequence<TTypeList, TIndexSequence>::type;
 
   //***************************************************************************
   /// Concatenates two or more type_lists.
@@ -425,8 +423,8 @@ namespace etl
     using index_sequence_for_prefix = etl::make_index_sequence<Index>;
     using index_sequence_for_suffix = etl::make_index_sequence_with_offset<Index, etl::type_list_size<TTypeList>::value - Index>;
 
-    using prefix = etl::type_list_select_from_sequence_t<TTypeList, index_sequence_for_prefix>;
-    using suffix = etl::type_list_select_from_sequence_t<TTypeList, index_sequence_for_suffix>;
+    using prefix = etl::type_list_select_from_index_sequence_t<TTypeList, index_sequence_for_prefix>;
+    using suffix = etl::type_list_select_from_index_sequence_t<TTypeList, index_sequence_for_suffix>;
 
   public:
 
