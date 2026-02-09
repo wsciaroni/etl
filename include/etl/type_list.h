@@ -79,6 +79,7 @@ namespace etl
 
   private:
 
+    // A type_list cannot be instantiated, so delete the constructor and assignment operators.
     type_list() ETL_DELETE;
     type_list(const type_list&) ETL_DELETE;
     type_list& operator =(const type_list&) ETL_DELETE;
@@ -109,6 +110,7 @@ namespace etl
 
   private:
 
+    // A type_list cannot be instantiated, so delete the constructor and assignment operators.
     type_list() ETL_DELETE;
     type_list(const type_list&) ETL_DELETE;
     type_list& operator =(const type_list&) ETL_DELETE;
@@ -418,10 +420,10 @@ namespace etl
   private:
 
     ETL_STATIC_ASSERT((etl::is_type_list<TTypeList>::value), "TTypeList must be an etl::type_list");
-    ETL_STATIC_ASSERT(Index <= etl::TTypeList::size,         "Index out of range");
+    ETL_STATIC_ASSERT(Index <= TTypeList::size,         "Index out of range");
 
     using index_sequence_for_prefix = etl::make_index_sequence<Index>;
-    using index_sequence_for_suffix = etl::make_index_sequence_with_offset<Index, etl::TTypeList::size - Index>;
+    using index_sequence_for_suffix = etl::make_index_sequence_with_offset<Index, TTypeList::size - Index>;
 
     using prefix = etl::type_list_select_from_index_sequence_t<TTypeList, index_sequence_for_prefix>;
     using suffix = etl::type_list_select_from_index_sequence_t<TTypeList, index_sequence_for_suffix>;
@@ -435,6 +437,173 @@ namespace etl
 #if ETL_USING_CPP11
   template <typename TTypeList, typename T, size_t Index>
   using type_list_insert_t = typename etl::type_list_insert<TTypeList, T, Index>::type;
+#endif
+
+  //***************************************************************************
+  /// Remove a type at an index in a type_list.
+  //***************************************************************************
+  template <typename TTypeList, size_t Index>
+  struct type_list_remove
+  {
+  private:
+
+    ETL_STATIC_ASSERT((etl::is_type_list<TTypeList>::value), "TTypeList must be an etl::type_list");
+    ETL_STATIC_ASSERT(Index < TTypeList::size,               "Index out of range");
+
+    using index_sequence_for_prefix = etl::make_index_sequence<Index>;
+    using index_sequence_for_suffix = etl::make_index_sequence_with_offset<Index + 1, TTypeList::size - Index - 1>;
+
+    using prefix = etl::type_list_select_from_index_sequence_t<TTypeList, index_sequence_for_prefix>;
+    using suffix = etl::type_list_select_from_index_sequence_t<TTypeList, index_sequence_for_suffix>;
+
+  public:
+
+    // Concatenate the prefix and suffix to create the new type list with the Index element removed.
+    using type = etl::type_list_cat_t<prefix, suffix>;
+  };
+
+#if ETL_USING_CPP11
+  template <typename TTypeList, size_t Index>
+  using type_list_remove_t = typename etl::type_list_remove<TTypeList, Index>::type;
+#endif
+
+  //***************************************************************************
+  // Remove types that satisfy a predicate from a type_list.
+  //***************************************************************************
+  namespace private_type_list
+  {
+    template <typename TTypeList, template <typename> class TPredicate>
+    struct type_list_remove_if_impl;
+
+    template <template <typename> class TPredicate>
+    struct type_list_remove_if_impl<etl::type_list<>, TPredicate>
+    {
+      using type = etl::type_list<>;
+    };
+
+    template <typename Head, typename... Tail, template <typename> class TPredicate>
+    struct type_list_remove_if_impl<etl::type_list<Head, Tail...>, TPredicate>
+    {
+    private:
+
+      using rest = typename type_list_remove_if_impl<etl::type_list<Tail...>, TPredicate>::type;
+
+    public:
+
+      using type = typename etl::conditional<TPredicate<Head>::value,
+                                             rest,
+                                             etl::type_list_prepend_t<rest, Head>>::type;
+    };
+  }
+
+  //***************************************************************************
+  /// Remove types that satisfy a predicate from a type_list.
+  /// Predicate must be: template <typename T> struct Pred : etl::bool_constant<...> {};
+  //***************************************************************************
+  template <typename TTypeList, template <typename> class TPredicate>
+  struct type_list_remove_if
+  {
+  private:
+
+    ETL_STATIC_ASSERT((etl::is_type_list<TTypeList>::value), "TTypeList must be an etl::type_list");
+
+  public:
+
+    using type = typename private_type_list::type_list_remove_if_impl<TTypeList, TPredicate>::type;
+  };
+
+#if ETL_USING_CPP11
+  template <typename TTypeList, template <typename> class TPredicate>
+  using type_list_remove_if_t = typename etl::type_list_remove_if<TTypeList, TPredicate>::type;
+#endif
+
+  //***************************************************************************
+  /// Removes the first type from a type_list.
+  //***************************************************************************
+  template <typename TTypeList>
+  struct type_list_pop_front
+  {
+  private:
+
+    ETL_STATIC_ASSERT((etl::is_type_list<TTypeList>::value), "TTypeList must be an etl::type_list");
+    ETL_STATIC_ASSERT(TTypeList::size > 0U,                  "Cannot pop_front from an empty type_list");
+
+  public:
+
+    using type = typename TTypeList::tail;
+  };
+
+#if ETL_USING_CPP11
+  template <typename TTypeList>
+  using type_list_pop_front_t = typename etl::type_list_pop_front<TTypeList>::type;
+#endif
+
+  //***************************************************************************
+  /// Removes the last type from a type_list.
+  //***************************************************************************
+  template <typename TTypeList>
+  struct type_list_pop_back
+  {
+  private:
+
+    ETL_STATIC_ASSERT((etl::is_type_list<TTypeList>::value), "TTypeList must be an etl::type_list");
+    ETL_STATIC_ASSERT(TTypeList::size > 0U,                  "Cannot pop_back from an empty type_list");
+
+  public:
+
+    using type = typename etl::type_list_remove<TTypeList, TTypeList::size - 1U>::type;
+  };
+
+#if ETL_USING_CPP11
+  template <typename TTypeList>
+  using type_list_pop_back_t = typename etl::type_list_pop_back<TTypeList>::type;
+#endif
+
+  //***************************************************************************
+  // Remove duplicate types from a type_list, preserving the first occurrence.
+  //***************************************************************************
+  namespace private_type_list
+  {
+    template <typename TTypeList, typename TResult>
+    struct type_list_unique_impl;
+
+    // Base case: empty list, return the result.
+    template <typename TResult>
+    struct type_list_unique_impl<etl::type_list<>, TResult>
+    {
+      using type = TResult;
+    };
+
+    // Recursive case: Check if the head is already in the result, if not add it, then recurse on the tail.
+    template <typename Head, typename... Tail, typename TResult>
+    struct type_list_unique_impl<etl::type_list<Head, Tail...>, TResult>
+    {
+    private:
+
+      using next_result = etl::conditional_t<etl::type_list_contains<TResult, Head>::value,
+                                             TResult,
+                                             etl::type_list_append_t<TResult, Head>>;
+
+    public:
+
+      using type = typename type_list_unique_impl<etl::type_list<Tail...>, next_result>::type;
+    };
+  }
+
+  //***************************************************************************
+  /// Defines a new type_list by removing duplicate types from a given type_list, preserving the first occurrence.
+  //***************************************************************************
+  template <typename TTypeList>
+  struct type_list_unique
+  {
+    ETL_STATIC_ASSERT((etl::is_type_list<TTypeList>::value), "TTypeList must be an etl::type_list");
+
+    using type = typename private_type_list::type_list_unique_impl<TTypeList, etl::type_list<>>::type;
+  };
+
+#if ETL_USING_CPP11
+  template <typename TTypeList>
+  using type_list_unique_t = typename etl::type_list_unique<TTypeList>::type;
 #endif
 
   //***************************************************************************

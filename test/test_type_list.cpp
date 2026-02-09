@@ -40,6 +40,11 @@ namespace
   struct B { static constexpr int id = 1; };
   struct C { static constexpr int id = 2; };
 
+  template <typename T>
+  struct is_type_b : etl::bool_constant<std::is_same<T, B>::value>
+  {
+  };
+
   // Convenience comparator for types that expose a constexpr integral ID (ascending)
   template <typename T1, typename T2>
   struct by_asencding_id : etl::bool_constant<(T1::id < T2::id)>
@@ -376,7 +381,7 @@ namespace
       using expected = etl::type_list<A>;
 
       CHECK((etl::is_same<result, expected>::value));
-      //CHECK_EQUAL(1U, etl::type_list_size<result>::value);
+      CHECK_EQUAL(1U, etl::type_list_size<result>::value);
     }
 
     //*************************************************************************
@@ -394,9 +399,172 @@ namespace
       CHECK((etl::is_same<result2, expected2>::value));
       CHECK((etl::is_same<result3, expected3>::value));
       
-      //CHECK_EQUAL(3U, etl::type_list_size<result1>::value);
-      //CHECK_EQUAL(3U, etl::type_list_size<result2>::value);
-      //CHECK_EQUAL(3U, etl::type_list_size<result3>::value);
+      CHECK_EQUAL(3U, etl::type_list_size<result1>::value);
+      CHECK_EQUAL(3U, etl::type_list_size<result2>::value);
+      CHECK_EQUAL(3U, etl::type_list_size<result3>::value);
+    }
+
+    //*************************************************************************
+    TEST(test_type_list_remove_from_empty_list)
+    {
+      // Uncomment to generate static_assert error.
+
+      //using list     = etl::type_list<>;
+      //using result1  = etl::type_list_remove_t<list, 0>;
+    }
+
+    //*************************************************************************
+    TEST(test_type_list_remove_from_single_list)
+    {
+      using list     = etl::type_list<A>;
+      using result1  = etl::type_list_remove_t<list, 0>;
+      using expected1 = etl::type_list<>;
+
+      CHECK((etl::is_same<result1, expected1>::value));
+
+      CHECK_EQUAL(0U, etl::type_list_size<result1>::value);
+    }
+
+    //*************************************************************************
+    TEST(test_type_list_remove_from_multiple_list)
+    {
+      using list     = etl::type_list<A, B, C>;
+      using result1  = etl::type_list_remove_t<list, 0>;
+      using result2  = etl::type_list_remove_t<list, 1>;
+      using result3  = etl::type_list_remove_t<list, 2>;
+      using expected1 = etl::type_list<B, C>;
+      using expected2 = etl::type_list<A, C>;
+      using expected3 = etl::type_list<A, B>;
+
+      CHECK((etl::is_same<result1, expected1>::value));
+      CHECK((etl::is_same<result2, expected2>::value));
+      CHECK((etl::is_same<result3, expected3>::value));
+
+      CHECK_EQUAL(2U, etl::type_list_size<result1>::value);
+      CHECK_EQUAL(2U, etl::type_list_size<result2>::value);
+      CHECK_EQUAL(2U, etl::type_list_size<result3>::value);
+    }
+
+    //*************************************************************************
+    TEST(test_type_list_remove_if_from_empty_list)
+    {
+      using list      = etl::type_list<>;
+      using result1   = etl::type_list_remove_if_t<list, is_type_b>;
+      using expected1 = etl::type_list<>;
+
+      CHECK((etl::is_same<result1, expected1>::value));
+
+      CHECK_EQUAL(0U, etl::type_list_size<result1>::value);
+    }
+
+    //*************************************************************************
+    TEST(test_type_list_remove_if_from_single_list)
+    {
+      using list1     = etl::type_list<A>;
+      using list2     = etl::type_list<B>;
+      using result1   = etl::type_list_remove_if_t<list1, is_type_b>;
+      using result2   = etl::type_list_remove_if_t<list2, is_type_b>;
+      using expected1 = etl::type_list<A>;
+      using expected2 = etl::type_list<>;
+
+      CHECK((etl::is_same<result1, expected1>::value));
+      CHECK((etl::is_same<result2, expected2>::value));
+
+      CHECK_EQUAL(1U, etl::type_list_size<result1>::value);
+      CHECK_EQUAL(0U, etl::type_list_size<result2>::value);
+    }
+
+    //*************************************************************************
+    TEST(test_type_list_remove_if_from_multiple_list)
+    {
+      using list     = etl::type_list<A, B, C>;
+      using result1  = etl::type_list_remove_if_t<list, is_type_b>;
+      using expected1 = etl::type_list<A, C>;
+
+      CHECK((etl::is_same<result1, expected1>::value));
+
+      CHECK_EQUAL(2U, etl::type_list_size<result1>::value);
+    }
+
+    //*************************************************************************
+    TEST(test_type_list_pop_front_empty_list)
+    {
+      // Uncomment to generate static_assert error.
+      
+      //using list     = etl::type_list<>;
+      //using result1  = etl::type_list_pop_front_t<list>;
+    }
+
+    //*************************************************************************
+    TEST(test_type_list_pop_front_from_non_empty_list)
+    {
+      using list     = etl::type_list<A, B, C>;
+      using result1  = etl::type_list_pop_front_t<list>;
+      using result2  = etl::type_list_pop_front_t<result1>;
+      using result3  = etl::type_list_pop_front_t<result2>;
+      using expected1 = etl::type_list<B, C>;
+      using expected2 = etl::type_list<C>;
+      using expected3 = etl::type_list<>;
+
+      CHECK((etl::is_same<result1, expected1>::value));
+      CHECK((etl::is_same<result2, expected2>::value));
+      CHECK((etl::is_same<result3, expected3>::value));
+
+      CHECK_EQUAL(2U, etl::type_list_size<result1>::value);
+      CHECK_EQUAL(1U, etl::type_list_size<result2>::value);
+      CHECK_EQUAL(0U, etl::type_list_size<result3>::value);
+    }
+
+    //*************************************************************************
+    TEST(test_type_list_pop_back_empty_list)
+    {
+      // Uncomment to generate static_assert error.
+
+      //using list     = etl::type_list<>;
+      //using result1  = etl::type_list_pop_front_t<list>;
+    }
+
+    //*************************************************************************
+    TEST(test_type_list_pop_back_from_non_empty_list)
+    {
+      using list     = etl::type_list<A, B, C>;
+      using result1  = etl::type_list_pop_back_t<list>;
+      using result2  = etl::type_list_pop_back_t<result1>;
+      using result3  = etl::type_list_pop_back_t<result2>;
+      using expected1 = etl::type_list<A, B>;
+      using expected2 = etl::type_list<A>;
+      using expected3 = etl::type_list<>;
+
+      CHECK((etl::is_same<result1, expected1>::value));
+      CHECK((etl::is_same<result2, expected2>::value));
+      CHECK((etl::is_same<result3, expected3>::value));
+
+      CHECK_EQUAL(2U, etl::type_list_size<result1>::value);
+      CHECK_EQUAL(1U, etl::type_list_size<result2>::value);
+      CHECK_EQUAL(0U, etl::type_list_size<result3>::value);
+    }
+
+    //*************************************************************************
+    TEST(test_type_list_unique_for_empty_list)
+    {
+      using list     = etl::type_list<>;
+      using result   = etl::type_list_unique_t<list>;
+      using expected = etl::type_list<>;
+
+      CHECK((etl::is_same<result, expected>::value));
+      CHECK_EQUAL(0U, etl::type_list_size<result>::value);
+    }
+
+    //*************************************************************************
+    TEST(test_type_list_unique_for_non_empty_list)
+    {
+      using list      = etl::type_list<A, B, A, C, C, B, C>;
+      using result1   = etl::type_list_unique_t<list>;
+      using expected1 = etl::type_list<A, B, C>;
+
+      CHECK((etl::is_same<result1, expected1>::value));
+
+      CHECK_EQUAL(3U, etl::type_list_size<result1>::value);
     }
   }
 #endif
