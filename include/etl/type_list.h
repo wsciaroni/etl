@@ -157,8 +157,8 @@ namespace etl
   template <typename TTypeList, size_t Index>
   struct type_list_type_at_index
   {
-    ETL_STATIC_ASSERT(Index < type_list_size<TTypeList>::value, "etl::type_list_type_at_index out of range");
-    ETL_STATIC_ASSERT((etl::is_type_list<TTypeList>::value),    "TTypeList must be an etl::type_list");
+    ETL_STATIC_ASSERT(Index < TTypeList::size,               "etl::type_list_type_at_index out of range");
+    ETL_STATIC_ASSERT((etl::is_type_list<TTypeList>::value), "TTypeList must be an etl::type_list");
 
     using type = typename type_list_type_at_index<typename TTypeList::tail, Index - 1>::type;
   };
@@ -166,7 +166,7 @@ namespace etl
   template <typename TTypeList>
   struct type_list_type_at_index<TTypeList, 0>
   {
-    ETL_STATIC_ASSERT((etl::is_type_list<TTypeList>::value),    "TTypeList must be an etl::type_list");
+    ETL_STATIC_ASSERT((etl::is_type_list<TTypeList>::value), "TTypeList must be an etl::type_list");
 
     using type = typename TTypeList::head;
   };
@@ -417,11 +417,11 @@ namespace etl
   {
   private:
 
-    ETL_STATIC_ASSERT((etl::is_type_list<TTypeList>::value),          "TTypeList must be an etl::type_list");
-    ETL_STATIC_ASSERT(Index <= etl::type_list_size<TTypeList>::value, "Index out of range");
+    ETL_STATIC_ASSERT((etl::is_type_list<TTypeList>::value), "TTypeList must be an etl::type_list");
+    ETL_STATIC_ASSERT(Index <= etl::TTypeList::size,         "Index out of range");
 
     using index_sequence_for_prefix = etl::make_index_sequence<Index>;
-    using index_sequence_for_suffix = etl::make_index_sequence_with_offset<Index, etl::type_list_size<TTypeList>::value - Index>;
+    using index_sequence_for_suffix = etl::make_index_sequence_with_offset<Index, etl::TTypeList::size - Index>;
 
     using prefix = etl::type_list_select_from_index_sequence_t<TTypeList, index_sequence_for_prefix>;
     using suffix = etl::type_list_select_from_index_sequence_t<TTypeList, index_sequence_for_suffix>;
