@@ -53,17 +53,6 @@ namespace etl
   template <typename... TTypes>
   struct type_list;
 
-  template <typename T>
-  struct is_type_list : etl::false_type {};
-
-  template <typename... TTypes>
-  struct is_type_list<etl::type_list<TTypes...>> : etl::true_type {};
-
-#if ETL_USING_CPP17
-  template <typename T>
-  inline constexpr bool is_type_list_v = is_type_list<T>::value;
-#endif
-
   //***************************************************************************
   /// Check if a type is an etl::type_list.
   //***************************************************************************
