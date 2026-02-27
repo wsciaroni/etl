@@ -572,6 +572,12 @@ namespace
     }
 
     //*************************************************************************
+    TEST_FIXTURE(SetupFixture, test_emplace)
+    {
+      // Implement a test for emplace when it is implemented.
+    }
+
+    //*************************************************************************
     TEST_FIXTURE(SetupFixture, test_assign_range)
     {
       Compare_Data compare_data(initial_data.begin(), initial_data.end());

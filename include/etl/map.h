@@ -1040,6 +1040,21 @@ namespace etl
     }
 #endif
 
+#if ETL_USING_CPP11
+    //*********************************************************************
+    // Returns a pair of an iterator to the inserted element (or to the element that prevented the insertion) and a bool denoting whether the insertion took place.
+    // \param args The arguments to forward to the constructor of the value_type to be emplaced.
+    // \return A pair of an iterator to the inserted element (or to the element that prevented the insertion) and a bool denoting whether the insertion took place.
+    //  If asserts or exceptions are enabled, emits map_full if the map does not have enough free space.
+    // write the function for emplace
+    // https://github.com/gcc-mirror/gcc/blob/d03af25c8978c1843e9ab97cff42601676168fc3/libstdc%2B%2B-v3/include/bits/stl_map.h#L612
+    template <typename... Args>
+    ETL_OR_STD::pair<iterator, bool> emplace(Args&&... args)
+    {
+      // TODO: Add implementation
+    }
+#endif // ETL_USING_CPP11
+
     //*********************************************************************
     /// Assigns values to the map.
     /// If asserts or exceptions are enabled, emits map_full if the map does not have enough free space.
