@@ -36,7 +36,21 @@ RUN set -eux \
         fi; \
         printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/99snapshot; \
     fi \
-    && apt-get update \
+    && if ! apt-get update; then \
+        if [[ -f /etc/apt/sources.list.d/debian.sources ]]; then \
+            sed -ri "s|^URIs: https?://deb.debian.org/debian$|URIs: http://archive.debian.org/debian|g" /etc/apt/sources.list.d/debian.sources; \
+            sed -ri "s|^URIs: https?://deb.debian.org/debian-security$|URIs: http://archive.debian.org/debian-security|g" /etc/apt/sources.list.d/debian.sources; \
+        else \
+            for list_file in /etc/apt/sources.list /etc/apt/sources.list.d/*.list; do \
+                [[ -f "${list_file}" ]] || continue; \
+                sed -ri "s|https?://deb.debian.org/debian|http://archive.debian.org/debian|g" "${list_file}"; \
+                sed -ri "s|https?://security.debian.org/debian-security|http://archive.debian.org/debian-security|g" "${list_file}"; \
+                sed -ri "s|https?://deb.debian.org/debian-security|http://archive.debian.org/debian-security|g" "${list_file}"; \
+            done; \
+        fi; \
+        printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/99snapshot; \
+        apt-get update; \
+    fi \
     && apt-get -y install --no-install-recommends \
         git \
         wget \
