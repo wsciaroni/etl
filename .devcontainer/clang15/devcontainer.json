@@ -5,7 +5,9 @@
 	"build": {
 		"dockerfile": "../Dockerfile",
 		"args": {
-			"BASE_IMAGE_NAME": "silkeh/clang:15"
+			"BASE_IMAGE_NAME": "silkeh/clang:15",
+			"DEBIAN_SNAPSHOT": "none",
+			"REINSTALL_CMAKE_VERSION_FROM_SOURCE": "none"
 		},
 		"context": "../context"
 	}
