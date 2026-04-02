@@ -17,11 +17,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Build
       run: |
         export CC=clang
         export CXX=clang++
-        cmake -DNO_STL=OFF -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=03 ./test/syntax_check
+        cmake -DNO_STL=OFF -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=03 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./test/syntax_check
         clang --version
         make -j $(getconf _NPROCESSORS_ONLN)
 
@@ -35,11 +37,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Build
       run: |
         export CC=clang
         export CXX=clang++
-        cmake -DNO_STL=ON -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=03 ./test/syntax_check
+        cmake -DNO_STL=ON -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=03 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./test/syntax_check
         clang --version
         make -j $(getconf _NPROCESSORS_ONLN)
 
@@ -53,11 +57,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Build
       run: |
         export CC=clang
         export CXX=clang++
-        cmake -DNO_STL=OFF -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=11 ./test/syntax_check
+        cmake -DNO_STL=OFF -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=11 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./test/syntax_check
         clang --version
         make -j $(getconf _NPROCESSORS_ONLN)
 
@@ -71,11 +77,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Build
       run: |
         export CC=clang
         export CXX=clang++
-        cmake -DNO_STL=ON -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=11 ./test/syntax_check
+        cmake -DNO_STL=ON -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=11 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./test/syntax_check
         clang --version
         make -j $(getconf _NPROCESSORS_ONLN)
 
@@ -89,11 +97,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Build
       run: |
         export CC=clang
         export CXX=clang++
-        cmake -DNO_STL=OFF -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=ON -DETL_CXX_STANDARD=11 ./test/syntax_check
+        cmake -DNO_STL=OFF -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=ON -DETL_CXX_STANDARD=11 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./test/syntax_check
         clang --version
         make -j $(getconf _NPROCESSORS_ONLN)
 
@@ -107,11 +117,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Build
       run: |
         export CC=clang
         export CXX=clang++
-        cmake -DNO_STL=ON -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=ON -DETL_CXX_STANDARD=11 ./test/syntax_check
+        cmake -DNO_STL=ON -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=ON -DETL_CXX_STANDARD=11 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./test/syntax_check
         clang --version
         make -j $(getconf _NPROCESSORS_ONLN)
 
@@ -125,11 +137,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Build
       run: |
         export CC=clang
         export CXX=clang++
-        cmake -DNO_STL=OFF -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=14 ./test/syntax_check
+        cmake -DNO_STL=OFF -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=14 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./test/syntax_check
         clang --version
         make -j $(getconf _NPROCESSORS_ONLN)
 
@@ -143,11 +157,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Build
       run: |
         export CC=clang
         export CXX=clang++
-        cmake -DNO_STL=ON -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=14 ./test/syntax_check
+        cmake -DNO_STL=ON -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=14 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./test/syntax_check
         clang --version
         make -j $(getconf _NPROCESSORS_ONLN)
 
@@ -161,11 +177,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Build
       run: |
         export CC=clang
         export CXX=clang++
-        cmake -DNO_STL=OFF -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=ON -DETL_CXX_STANDARD=14 ./test/syntax_check
+        cmake -DNO_STL=OFF -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=ON -DETL_CXX_STANDARD=14 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./test/syntax_check
         clang --version
         make -j $(getconf _NPROCESSORS_ONLN)
 
@@ -179,11 +197,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Build
       run: |
         export CC=clang
         export CXX=clang++
-        cmake -DNO_STL=ON -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=ON -DETL_CXX_STANDARD=14 ./test/syntax_check
+        cmake -DNO_STL=ON -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=ON -DETL_CXX_STANDARD=14 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./test/syntax_check
         clang --version
         make -j $(getconf _NPROCESSORS_ONLN)
 
@@ -197,11 +217,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Build
       run: |
         export CC=clang
         export CXX=clang++
-        cmake -DNO_STL=OFF -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=17 ./test/syntax_check
+        cmake -DNO_STL=OFF -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=17 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./test/syntax_check
         clang --version
         make -j $(getconf _NPROCESSORS_ONLN)
 
@@ -215,11 +237,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Build
       run: |
         export CC=clang
         export CXX=clang++
-        cmake -DNO_STL=ON -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=17 ./test/syntax_check
+        cmake -DNO_STL=ON -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=17 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./test/syntax_check
         clang --version
         make -j $(getconf _NPROCESSORS_ONLN)
 
@@ -233,11 +257,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Build
       run: |
         export CC=clang
         export CXX=clang++
-        cmake -DNO_STL=OFF -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=ON -DETL_CXX_STANDARD=17 ./test/syntax_check
+        cmake -DNO_STL=OFF -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=ON -DETL_CXX_STANDARD=17 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./test/syntax_check
         clang --version
         make -j $(getconf _NPROCESSORS_ONLN)
 
@@ -251,11 +277,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Build
       run: |
         export CC=clang
         export CXX=clang++
-        cmake -DNO_STL=ON -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=ON -DETL_CXX_STANDARD=17 ./test/syntax_check
+        cmake -DNO_STL=ON -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=ON -DETL_CXX_STANDARD=17 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./test/syntax_check
         clang --version
         make -j $(getconf _NPROCESSORS_ONLN)
 
@@ -269,11 +297,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Build
       run: |
         export CC=clang
         export CXX=clang++
-        cmake -DNO_STL=OFF -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=20 ./test/syntax_check
+        cmake -DNO_STL=OFF -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=20 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./test/syntax_check
         clang --version
         make -j $(getconf _NPROCESSORS_ONLN)
 
@@ -287,11 +317,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Build
       run: |
         export CC=clang
         export CXX=clang++
-        cmake -DNO_STL=ON -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=20 ./test/syntax_check
+        cmake -DNO_STL=ON -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=20 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./test/syntax_check
         clang --version
         make -j $(getconf _NPROCESSORS_ONLN)
 
@@ -305,11 +337,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Build
       run: |
         export CC=clang
         export CXX=clang++
-        cmake -DNO_STL=OFF -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=ON -DETL_CXX_STANDARD=20 ./test/syntax_check
+        cmake -DNO_STL=OFF -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=ON -DETL_CXX_STANDARD=20 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./test/syntax_check
         clang --version
         make -j $(getconf _NPROCESSORS_ONLN)
 
@@ -323,11 +357,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Build
       run: |
         export CC=clang
         export CXX=clang++
-        cmake -DNO_STL=ON -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=ON -DETL_CXX_STANDARD=20 ./test/syntax_check
+        cmake -DNO_STL=ON -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=ON -DETL_CXX_STANDARD=20 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./test/syntax_check
         clang --version
         make -j $(getconf _NPROCESSORS_ONLN)
 
@@ -341,11 +377,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Build
       run: |
         export CC=clang
         export CXX=clang++
-        cmake -DNO_STL=OFF -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=23 ./test/syntax_check
+        cmake -DNO_STL=OFF -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=23 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./test/syntax_check
         clang --version
         make -j $(getconf _NPROCESSORS_ONLN)
 
@@ -359,11 +397,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Build
       run: |
         export CC=clang
         export CXX=clang++
-        cmake -DNO_STL=ON -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=23 ./test/syntax_check
+        cmake -DNO_STL=ON -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=23 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./test/syntax_check
         clang --version
         make -j $(getconf _NPROCESSORS_ONLN)
 
@@ -377,11 +417,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Build
       run: |
         export CC=clang
         export CXX=clang++
-        cmake -DNO_STL=OFF -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=ON -DETL_CXX_STANDARD=23 ./test/syntax_check
+        cmake -DNO_STL=OFF -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=ON -DETL_CXX_STANDARD=23 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./test/syntax_check
         clang --version
         make -j $(getconf _NPROCESSORS_ONLN)
 
@@ -395,10 +437,12 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Build
       run: |
         export CC=clang
         export CXX=clang++
-        cmake -DNO_STL=ON -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=ON -DETL_CXX_STANDARD=23 ./test/syntax_check
+        cmake -DNO_STL=ON -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=ON -DETL_CXX_STANDARD=23 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./test/syntax_check
         clang --version
         make -j $(getconf _NPROCESSORS_ONLN)
