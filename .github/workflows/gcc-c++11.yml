@@ -18,13 +18,17 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ github.job }}
+
     - name: Build
       run: |
         git fetch
         export ASAN_OPTIONS=alloc_dealloc_mismatch=0,detect_leaks=0
         export CC=gcc
         export CXX=g++
-        cmake -DBUILD_TESTS=ON -DNO_STL=OFF -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=11 ./
+        cmake -DBUILD_TESTS=ON -DNO_STL=OFF -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=11 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./
         gcc --version
         make -j $(getconf _NPROCESSORS_ONLN)
     
@@ -41,13 +45,17 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ github.job }}
+
     - name: Build
       run: |
         git fetch
         export ASAN_OPTIONS=alloc_dealloc_mismatch=0,detect_leaks=0
         export CC=gcc
         export CXX=g++
-        cmake -DBUILD_TESTS=ON -DNO_STL=ON -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=11 ./
+        cmake -DBUILD_TESTS=ON -DNO_STL=ON -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=OFF -DETL_CXX_STANDARD=11 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./
         gcc --version
         make -j $(getconf _NPROCESSORS_ONLN)
     
