@@ -117,6 +117,24 @@ namespace
     }
   };
 
+  struct TaggedRecord
+  {
+    TaggedRecord()
+      : value(0)
+      , tag(0)
+    {
+    }
+
+    TaggedRecord(int value_, int tag_)
+      : value(value_)
+      , tag(tag_)
+    {
+    }
+
+    int value;
+    int tag;
+  };
+
   Data dataD[10] = { Data(1, 2), Data(2, 1), Data(3, 4), Data(4, 3), Data(5, 6), Data(6, 5), Data(7, 8), Data(8, 7), Data(9, 10), Data(10, 9) };
 
   struct Greater : public etl::binary_function<int, int, bool>
@@ -2467,18 +2485,6 @@ namespace
     //*************************************************************************
     TEST(stable_partition_non_trivial_tagged_records_preserve_order)
     {
-      struct TaggedRecord
-      {
-        TaggedRecord(int value_, int tag_)
-          : value(value_)
-          , tag(tag_)
-        {
-        }
-
-        int value;
-        int tag;
-      };
-
       std::vector<TaggedRecord> data = {
         TaggedRecord(0,  10),
         TaggedRecord(3,  20),
@@ -2555,24 +2561,6 @@ namespace
     //*************************************************************************
     TEST(stable_partition_with_external_scratch_memory_non_trivial)
     {
-      struct TaggedRecord
-      {
-        TaggedRecord()
-          : value(0)
-          , tag(0)
-        {
-        }
-
-        TaggedRecord(int value_, int tag_)
-          : value(value_)
-          , tag(tag_)
-        {
-        }
-
-        int value;
-        int tag;
-      };
-
       std::vector<TaggedRecord> data = {
         TaggedRecord(0,  10),
         TaggedRecord(3,  20),
