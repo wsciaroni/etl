@@ -3494,6 +3494,76 @@ namespace etl
     return etl::find_if_not(first, last, predicate);
   }
 
+  //***************************************************************************
+  /// stable_partition
+  /// O(N) version that uses caller supplied scratch memory.
+  /// Scratch memory must be able to store at least etl::distance(first, last)
+  /// elements and must not overlap with [first, last).
+  //***************************************************************************
+  template <typename TIterator, typename TScratchIterator, typename TPredicate>
+  ETL_CONSTEXPR14
+  typename etl::enable_if<etl::is_forward_iterator_concept<TIterator>::value &&
+                          etl::is_forward_iterator_concept<TScratchIterator>::value,
+                          TIterator>::type
+    stable_partition(TIterator first,
+                     TIterator last,
+                     TScratchIterator scratch,
+                     TPredicate predicate)
+  {
+    TScratchIterator scratch_end = etl::move(first, last, scratch);
+
+    TIterator write = first;
+
+    for (TScratchIterator read = scratch; read != scratch_end; ++read)
+    {
+      if (predicate(*read))
+      {
+        *write = ETL_MOVE(*read);
+        ++write;
+      }
+    }
+
+    TIterator partition_point = write;
+
+    for (TScratchIterator read = scratch; read != scratch_end; ++read)
+    {
+      if (!predicate(*read))
+      {
+        *write = ETL_MOVE(*read);
+        ++write;
+      }
+    }
+
+    return partition_point;
+  }
+
+  //***************************************************************************
+  /// stable_partition
+  /// O(N) version that uses caller supplied bounded scratch memory.
+  /// The scratch range must be at least as large as the input range.
+  //***************************************************************************
+  template <typename TIterator, typename TScratchIterator, typename TPredicate>
+  ETL_CONSTEXPR14
+  typename etl::enable_if<etl::is_forward_iterator_concept<TIterator>::value &&
+                          etl::is_forward_iterator_concept<TScratchIterator>::value,
+                          TIterator>::type
+    stable_partition(TIterator first,
+                     TIterator last,
+                     TScratchIterator scratch_first,
+                     TScratchIterator scratch_last,
+                     TPredicate predicate)
+  {
+    typedef typename etl::iterator_traits<TIterator>::difference_type input_difference_type;
+    typedef typename etl::iterator_traits<TScratchIterator>::difference_type scratch_difference_type;
+
+    const input_difference_type input_size = etl::distance(first, last);
+    const scratch_difference_type scratch_size = etl::distance(scratch_first, scratch_last);
+
+    ETL_ASSERT(scratch_size >= scratch_difference_type(input_size), ETL_ERROR(etl::algorithm_error));
+
+    return etl::stable_partition(first, last, scratch_first, predicate);
+  }
+
   //*********************************************************
   namespace private_algorithm
   {

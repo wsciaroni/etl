@@ -2514,6 +2514,45 @@ namespace
     }
 
     //*************************************************************************
+    TEST(stable_partition_with_external_scratch_memory)
+    {
+      etl::array<int, 9> data     = { 0, 0, 3, -1, 2, 4, 5, 0, 7 };
+      etl::array<int, 9> scratch  = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+      etl::array<int, 9> expected = { 3, 2, 4, 5, 7, 0, 0, -1, 0 };
+
+      etl::array<int, 9>::iterator partition_point = etl::stable_partition(data.begin(),
+                                                                            data.end(),
+                                                                            scratch.begin(),
+                                                                            [](int value) { return value > 0; });
+
+      CHECK_EQUAL(5, std::distance(data.begin(), partition_point));
+      CHECK_EQUAL(0, *partition_point);
+
+      bool is_same = std::equal(expected.begin(), expected.end(), data.begin());
+      CHECK(is_same);
+    }
+
+    //*************************************************************************
+    TEST(stable_partition_with_external_scratch_memory_range)
+    {
+      std::vector<int> data    = { 0, 0, 3, -1, 2, 4, 5, 0, 7 };
+      std::vector<int> scratch = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+      std::vector<int> expected = { 3, 2, 4, 5, 7, 0, 0, -1, 0 };
+
+      std::vector<int>::iterator partition_point = etl::stable_partition(data.begin(),
+                                                                          data.end(),
+                                                                          scratch.begin(),
+                                                                          scratch.end(),
+                                                                          [](int value) { return value > 0; });
+
+      CHECK_EQUAL(5, std::distance(data.begin(), partition_point));
+      CHECK_EQUAL(0, *partition_point);
+
+      bool is_same = std::equal(expected.begin(), expected.end(), data.begin());
+      CHECK(is_same);
+    }
+
+    //*************************************************************************
     TEST(nth_element_with_default_less_than_comparison)
     {
       // 40,320 permutations.
