@@ -3431,6 +3431,69 @@ namespace etl
     return first;
   }
 
+  //***************************************************************************
+  /// stable_partition
+  /// For forward iterators and above
+  /// Maintains the order of equivalent elements.
+  /// Implemented in-place using iterative merge passes and etl::rotate.
+  //***************************************************************************
+  template <typename TIterator, typename TPredicate>
+  ETL_CONSTEXPR14
+  typename etl::enable_if<etl::is_forward_iterator_concept<TIterator>::value, TIterator>::type
+    stable_partition(TIterator first, TIterator last, TPredicate predicate)
+  {
+    typedef typename etl::iterator_traits<TIterator>::difference_type difference_type;
+
+    const difference_type length = etl::distance(first, last);
+
+    if (length <= 1)
+    {
+      return etl::find_if_not(first, last, predicate);
+    }
+
+    difference_type width = 1;
+
+    while (width < length)
+    {
+      TIterator block_first = first;
+      difference_type remaining = length;
+
+      while (remaining > 0)
+      {
+        const difference_type left_length = (width < remaining) ? width : remaining;
+        TIterator middle = block_first;
+        etl::advance(middle, left_length);
+        remaining -= left_length;
+
+        if (remaining == 0)
+        {
+          break;
+        }
+
+        const difference_type right_length = (width < remaining) ? width : remaining;
+        TIterator block_last = middle;
+        etl::advance(block_last, right_length);
+        remaining -= right_length;
+
+        TIterator left_false = etl::find_if_not(block_first, middle, predicate);
+        TIterator right_false = etl::find_if_not(middle, block_last, predicate);
+
+        etl::rotate(left_false, middle, right_false);
+
+        block_first = block_last;
+      }
+
+      if (width > (length / 2))
+      {
+        break;
+      }
+
+      width *= 2;
+    }
+
+    return etl::find_if_not(first, last, predicate);
+  }
+
   //*********************************************************
   namespace private_algorithm
   {
