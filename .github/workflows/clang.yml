@@ -1,0 +1,172 @@
+name: clang
+
+on:
+  push:
+    branches: [ master, development, pull-request/* ]
+  pull_request:
+    branches: [ master, development, pull-request/* ]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Clang C++${{ matrix.cxx_standard }} ${{ matrix.os_name }} - ${{ matrix.no_stl == 'ON' && 'No STL' || 'STL' }}${{ matrix.force_cpp03 == 'ON' && ' - Force C++03' || '' }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        cxx_standard: [11, 14, 17]
+        no_stl: ['ON', 'OFF']
+        include:
+          # Default values for the base Linux C++11/14/17 combinations
+          - os: ubuntu-22.04
+            os_name: Linux
+            cc: clang
+            cxx: clang++
+            needs_newer_clang: false
+            force_cpp03: 'OFF'
+          # Linux C++20 (requires newer Clang; STL-only is covered by the macOS builds)
+          - os: ubuntu-22.04
+            os_name: Linux
+            cxx_standard: 20
+            no_stl: 'ON'
+            force_cpp03: 'OFF'
+            cc: clang-17
+            cxx: clang++-17
+            needs_newer_clang: true
+          - os: ubuntu-22.04
+            os_name: Linux
+            cxx_standard: 20
+            no_stl: 'OFF'
+            force_cpp03: 'ON'
+            cc: clang-17
+            cxx: clang++-17
+            needs_newer_clang: true
+          - os: ubuntu-22.04
+            os_name: Linux
+            cxx_standard: 20
+            no_stl: 'ON'
+            force_cpp03: 'ON'
+            cc: clang-17
+            cxx: clang++-17
+            needs_newer_clang: true
+          # Linux C++23 (requires newer Clang; STL-only is covered by the macOS builds)
+          - os: ubuntu-22.04
+            os_name: Linux
+            cxx_standard: 23
+            no_stl: 'ON'
+            force_cpp03: 'OFF'
+            cc: clang-17
+            cxx: clang++-17
+            needs_newer_clang: true
+          - os: ubuntu-22.04
+            os_name: Linux
+            cxx_standard: 23
+            no_stl: 'OFF'
+            force_cpp03: 'ON'
+            cc: clang-17
+            cxx: clang++-17
+            needs_newer_clang: true
+          - os: ubuntu-22.04
+            os_name: Linux
+            cxx_standard: 23
+            no_stl: 'ON'
+            force_cpp03: 'ON'
+            cc: clang-17
+            cxx: clang++-17
+            needs_newer_clang: true
+          # macOS C++20
+          - os: macos-15
+            os_name: OSX
+            cxx_standard: 20
+            no_stl: 'OFF'
+            force_cpp03: 'OFF'
+            cc: clang
+            cxx: clang++
+            needs_newer_clang: false
+          - os: macos-15
+            os_name: OSX
+            cxx_standard: 20
+            no_stl: 'ON'
+            force_cpp03: 'OFF'
+            cc: clang
+            cxx: clang++
+            needs_newer_clang: false
+          - os: macos-15
+            os_name: OSX
+            cxx_standard: 20
+            no_stl: 'OFF'
+            force_cpp03: 'ON'
+            cc: clang
+            cxx: clang++
+            needs_newer_clang: false
+          - os: macos-15
+            os_name: OSX
+            cxx_standard: 20
+            no_stl: 'ON'
+            force_cpp03: 'ON'
+            cc: clang
+            cxx: clang++
+            needs_newer_clang: false
+          # macOS C++23
+          - os: macos-15
+            os_name: OSX
+            cxx_standard: 23
+            no_stl: 'OFF'
+            force_cpp03: 'OFF'
+            cc: clang
+            cxx: clang++
+            needs_newer_clang: false
+          - os: macos-15
+            os_name: OSX
+            cxx_standard: 23
+            no_stl: 'ON'
+            force_cpp03: 'OFF'
+            cc: clang
+            cxx: clang++
+            needs_newer_clang: false
+          - os: macos-15
+            os_name: OSX
+            cxx_standard: 23
+            no_stl: 'OFF'
+            force_cpp03: 'ON'
+            cc: clang
+            cxx: clang++
+            needs_newer_clang: false
+          - os: macos-15
+            os_name: OSX
+            cxx_standard: 23
+            no_stl: 'ON'
+            force_cpp03: 'ON'
+            cc: clang
+            cxx: clang++
+            needs_newer_clang: false
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ github.job }}-${{ matrix.os }}-${{ matrix.cxx_standard }}-${{ matrix.no_stl }}-${{ matrix.force_cpp03 }}
+
+    # Temporary fix for Ubuntu runner. See https://github.com/actions/runner-images/issues/8659
+    - name: Install newer Clang
+      if: matrix.needs_newer_clang
+      run: |
+        wget https://apt.llvm.org/llvm.sh
+        chmod +x ./llvm.sh
+        sudo ./llvm.sh 17
+
+    - name: Build
+      run: |
+        export CC=${{ matrix.cc }}
+        export CXX=${{ matrix.cxx }}
+        export ASAN_OPTIONS=alloc_dealloc_mismatch=0,detect_leaks=0
+        cmake -DBUILD_TESTS=ON -DNO_STL=${{ matrix.no_stl }} -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=${{ matrix.force_cpp03 }} -DETL_CXX_STANDARD=${{ matrix.cxx_standard }} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./
+        ${{ matrix.cc }} --version
+        make -j $(getconf _NPROCESSORS_ONLN)
+
+    - name: Run tests
+      run: ./test/etl_tests -v
