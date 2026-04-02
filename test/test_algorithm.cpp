@@ -2469,25 +2469,25 @@ namespace
     {
       struct TaggedRecord
       {
-        TaggedRecord(int value_, const std::string& tag_)
+        TaggedRecord(int value_, int tag_)
           : value(value_)
           , tag(tag_)
         {
         }
 
         int value;
-        std::string tag;
+        int tag;
       };
 
       std::vector<TaggedRecord> data = {
-        TaggedRecord(0,  "f0_a"),
-        TaggedRecord(3,  "t3_a"),
-        TaggedRecord(-1, "f1_a"),
-        TaggedRecord(2,  "t2_a"),
-        TaggedRecord(0,  "f0_b"),
-        TaggedRecord(4,  "t4_a"),
-        TaggedRecord(-2, "f2_a"),
-        TaggedRecord(5,  "t5_a")
+        TaggedRecord(0,  10),
+        TaggedRecord(3,  20),
+        TaggedRecord(-1, 11),
+        TaggedRecord(2,  21),
+        TaggedRecord(0,  12),
+        TaggedRecord(4,  22),
+        TaggedRecord(-2, 13),
+        TaggedRecord(5,  23)
       };
 
       std::vector<TaggedRecord>::iterator partition_point = etl::stable_partition(data.begin(),
@@ -2496,8 +2496,8 @@ namespace
 
       CHECK_EQUAL(4, std::distance(data.begin(), partition_point));
 
-      const std::array<const char*, 4> expected_true_tags  = { "t3_a", "t2_a", "t4_a", "t5_a" };
-      const std::array<const char*, 4> expected_false_tags = { "f0_a", "f1_a", "f0_b", "f2_a" };
+      const std::array<int, 4> expected_true_tags  = { 20, 21, 22, 23 };
+      const std::array<int, 4> expected_false_tags = { 10, 11, 12, 13 };
 
       for (size_t i = 0U; i < expected_true_tags.size(); ++i)
       {
@@ -2550,6 +2550,65 @@ namespace
 
       bool is_same = std::equal(expected.begin(), expected.end(), data.begin());
       CHECK(is_same);
+    }
+
+    //*************************************************************************
+    TEST(stable_partition_with_external_scratch_memory_non_trivial)
+    {
+      struct TaggedRecord
+      {
+        TaggedRecord()
+          : value(0)
+          , tag(0)
+        {
+        }
+
+        TaggedRecord(int value_, int tag_)
+          : value(value_)
+          , tag(tag_)
+        {
+        }
+
+        int value;
+        int tag;
+      };
+
+      std::vector<TaggedRecord> data = {
+        TaggedRecord(0,  10),
+        TaggedRecord(3,  20),
+        TaggedRecord(-1, 11),
+        TaggedRecord(2,  21),
+        TaggedRecord(0,  12),
+        TaggedRecord(4,  22),
+        TaggedRecord(-2, 13),
+        TaggedRecord(5,  23)
+      };
+
+      std::vector<TaggedRecord> scratch(data.size());
+
+      std::vector<TaggedRecord>::iterator partition_point = etl::stable_partition(data.begin(),
+                                                                                   data.end(),
+                                                                                   scratch.begin(),
+                                                                                   scratch.end(),
+                                                                                   [](const TaggedRecord& r) { return r.value > 0; });
+
+      CHECK_EQUAL(4, std::distance(data.begin(), partition_point));
+
+      const std::array<int, 4> expected_true_tags  = { 20, 21, 22, 23 };
+      const std::array<int, 4> expected_false_tags = { 10, 11, 12, 13 };
+
+      for (size_t i = 0U; i < expected_true_tags.size(); ++i)
+      {
+        CHECK(data[i].value > 0);
+        CHECK_EQUAL(expected_true_tags[i], data[i].tag);
+      }
+
+      for (size_t i = 0U; i < expected_false_tags.size(); ++i)
+      {
+        const size_t index = i + expected_true_tags.size();
+        CHECK(data[index].value <= 0);
+        CHECK_EQUAL(expected_false_tags[i], data[index].tag);
+      }
     }
 
     //*************************************************************************
