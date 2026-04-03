@@ -9,10 +9,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   build-windows:
     name: Windows (NO_STL=${{ matrix.no_stl }}, CPP03=${{ matrix.force_cpp03 }})
@@ -45,34 +41,19 @@ jobs:
 
 
     - name: Configure CMake
-      run: |
-        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release `
-          -DBUILD_TESTS=ON `
-          -DNO_STL=${{ matrix.no_stl }} `
-          -DETL_USE_TYPE_TRAITS_BUILTINS=OFF `
-          -DETL_USER_DEFINED_TYPE_TRAITS=OFF `
-          -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=${{ matrix.force_cpp03 }} `
-          -DETL_CXX_STANDARD=17 `
-          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache `
-          -DCMAKE_C_COMPILER_LAUNCHER=ccache ./
+      uses: ./.github/actions/configure-cmake-etl-windows
+      with:
+        no-stl: ${{ matrix.no_stl }}
+        force-cpp03: ${{ matrix.force_cpp03 }}
 
     - name: Build
-      run: cmake --build .
+      run: cmake --build . --parallel
 
-    - name: Run tests
-      run: test/etl_tests.exe -v
-
-    - name: Upload failure artifacts
-      if: failure()
-      uses: actions/upload-artifact@v4
+    - name: Post build checks
+      uses: ./.github/actions/post-build-windows
       with:
-        name: msvc-failure-nostl${{ matrix.no_stl }}-cpp03${{ matrix.force_cpp03 }}
-        path: |
+        artifact-name: msvc-failure-nostl${{ matrix.no_stl }}-cpp03${{ matrix.force_cpp03 }}
+        artifact-path: |
           test/etl_tests.exe
           CMakeCache.txt
           Testing/Temporary/LastTest.log
-        if-no-files-found: ignore
-        retention-days: 14
-
-    - name: Print ccache statistics
-      run: ccache -s
