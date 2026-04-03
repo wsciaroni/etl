@@ -39,7 +39,7 @@ jobs:
 
     - name: Configure CMake
       run: |
-        cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug `
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release `
           -DBUILD_TESTS=ON `
           -DNO_STL=${{ matrix.no_stl }} `
           -DETL_USE_TYPE_TRAITS_BUILTINS=OFF `
@@ -53,7 +53,6 @@ jobs:
       run: cmake --build .
 
     - name: Run tests
-      # Note: Ninja outputs to the root target directory instead of a 'Debug/' subdirectory 
       run: test/etl_tests.exe -v
 
     - name: Print ccache statistics
