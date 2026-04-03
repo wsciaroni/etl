@@ -7,6 +7,7 @@ This folder contains ETL GitHub Actions workflows for compiler checks, syntax ch
 - `msvc.yml`: Windows/MSVC matrix checks.
 - `gcc.yml`: Linux/GCC matrix checks.
 - `clang.yml`: Linux and macOS/Clang matrix checks.
+- `ci-lint.yml`: GitHub workflow and composite action YAML linting.
 - `syntax-checks.yml`: Header syntax validation matrix.
 - `generator.yml`: Generated-header drift checks.
 - `platformio-update.yml`: Publish package to PlatformIO on release.

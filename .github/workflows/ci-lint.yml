@@ -1,0 +1,51 @@
+name: ci lint
+
+on:
+  push:
+    branches: [ master, development, pull-request/* ]
+  pull_request:
+    branches: [ master, development, pull-request/* ]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-workflows:
+    name: Workflow and Action YAML Lint
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Install yamllint
+      run: |
+        set -euo pipefail
+        python -m pip install --upgrade pip
+        python -m pip install yamllint==1.35.1
+
+    - name: Lint workflow YAML files
+      run: |
+        set -euo pipefail
+        yamllint -d "{extends: default, rules: {document-start: disable, line-length: disable, comments: disable, truthy: disable}}" .github/workflows/*.yml
+
+    - name: Lint composite action YAML files
+      run: |
+        set -euo pipefail
+        find .github/actions -name action.yml -print0 | xargs -0 yamllint -d "{extends: default, rules: {document-start: disable, line-length: disable, comments: disable, truthy: disable}}"
+
+    - name: Run actionlint
+      uses: docker://rhysd/actionlint:1.7.7
+      with:
+        args: -color
