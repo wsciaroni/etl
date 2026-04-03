@@ -165,10 +165,12 @@ jobs:
       if: matrix.needs_newer_clang
       run: |
         set -euo pipefail
-        curl -fsSL --retry 5 --retry-delay 2 --retry-connrefused https://apt.llvm.org/llvm.sh -o llvm.sh
-        grep -q '^#!/usr/bin/env bash' llvm.sh
-        chmod +x ./llvm.sh
-        sudo ./llvm.sh 17
+        sudo mkdir -p /etc/apt/keyrings
+        curl -fsSL --retry 5 --retry-delay 2 --retry-connrefused https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/llvm-archive-keyring.gpg >/dev/null
+        . /etc/os-release
+        echo "deb [signed-by=/etc/apt/keyrings/llvm-archive-keyring.gpg] https://apt.llvm.org/${VERSION_CODENAME}/ llvm-toolchain-${VERSION_CODENAME}-17 main" | sudo tee /etc/apt/sources.list.d/llvm.list >/dev/null
+        sudo apt-get update
+        sudo apt-get install -y clang-17
 
     - name: Build
       run: |

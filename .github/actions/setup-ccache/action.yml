@@ -20,6 +20,6 @@ runs:
     - name: Setup ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
-        key: ${{ runner.os }}-${{ github.workflow }}-${{ github.job }}-${{ inputs.key-suffix }}-${{ hashFiles('CMakeLists.txt', 'test/CMakeLists.txt') }}
+        key: ${{ runner.os }}-${{ github.workflow }}-${{ github.job }}-${{ inputs.key-suffix }}-${{ hashFiles('CMakeLists.txt', 'test/CMakeLists.txt', 'test/syntax_check/CMakeLists.txt') }}
         variant: ${{ inputs.variant }}
         max-size: ${{ inputs.max-size }}
