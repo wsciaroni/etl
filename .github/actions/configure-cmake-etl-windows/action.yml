@@ -1,0 +1,40 @@
+name: Configure CMake for ETL (Windows)
+description: Configure CMake with shared ETL build flags for Windows/MSVC workflows.
+
+inputs:
+  source-dir:
+    description: Source directory passed to CMake.
+    required: false
+    default: ./
+  no-stl:
+    description: Value for NO_STL (ON/OFF).
+    required: true
+  force-cpp03:
+    description: Value for ETL_FORCE_TEST_CPP03_IMPLEMENTATION (ON/OFF).
+    required: true
+  cxx-standard:
+    description: ETL_CXX_STANDARD value.
+    required: false
+    default: "17"
+
+runs:
+  using: composite
+  steps:
+    - name: Configure CMake
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        $cmakeArgs = @(
+          '-G', 'Ninja',
+          '-DCMAKE_BUILD_TYPE=Release',
+          '-DBUILD_TESTS=ON',
+          "-DNO_STL=${{ inputs.no-stl }}",
+          '-DETL_USE_TYPE_TRAITS_BUILTINS=OFF',
+          '-DETL_USER_DEFINED_TYPE_TRAITS=OFF',
+          "-DETL_FORCE_TEST_CPP03_IMPLEMENTATION=${{ inputs.force-cpp03 }}",
+          "-DETL_CXX_STANDARD=${{ inputs.cxx-standard }}",
+          '-DCMAKE_CXX_COMPILER_LAUNCHER=ccache',
+          '-DCMAKE_C_COMPILER_LAUNCHER=ccache',
+          '${{ inputs.source-dir }}'
+        )
+        cmake @cmakeArgs

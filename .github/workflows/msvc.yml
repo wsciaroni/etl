@@ -45,16 +45,10 @@ jobs:
 
 
     - name: Configure CMake
-      run: |
-        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release `
-          -DBUILD_TESTS=ON `
-          -DNO_STL=${{ matrix.no_stl }} `
-          -DETL_USE_TYPE_TRAITS_BUILTINS=OFF `
-          -DETL_USER_DEFINED_TYPE_TRAITS=OFF `
-          -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=${{ matrix.force_cpp03 }} `
-          -DETL_CXX_STANDARD=17 `
-          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache `
-          -DCMAKE_C_COMPILER_LAUNCHER=ccache ./
+      uses: ./.github/actions/configure-cmake-etl-windows
+      with:
+        no-stl: ${{ matrix.no_stl }}
+        force-cpp03: ${{ matrix.force_cpp03 }}
 
     - name: Build
       run: cmake --build . --parallel

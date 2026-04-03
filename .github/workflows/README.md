@@ -39,6 +39,10 @@ Linux compiler and syntax workflows should use the shared CMake configure action
 
 - `../actions/configure-cmake-etl/action.yml`
 
+Windows MSVC workflow should use the shared Windows configure action:
+
+- `../actions/configure-cmake-etl-windows/action.yml`
+
 This keeps core ETL configure flags centralized:
 
 - `NO_STL`
