@@ -57,7 +57,7 @@ jobs:
           -DCMAKE_C_COMPILER_LAUNCHER=ccache ./
 
     - name: Build
-      run: cmake --build .
+      run: cmake --build . --parallel
 
     - name: Run tests
       run: test/etl_tests.exe -v

@@ -33,6 +33,35 @@ This convention is implemented by the shared composite action:
 
 Compiler and syntax workflows should call this action instead of invoking `hendrikmuhs/ccache-action` directly.
 
+## CMake Configure Convention
+
+Linux compiler and syntax workflows should use the shared CMake configure action:
+
+- `../actions/configure-cmake-etl/action.yml`
+
+This keeps core ETL configure flags centralized:
+
+- `NO_STL`
+- `ETL_USE_TYPE_TRAITS_BUILTINS`
+- `ETL_USER_DEFINED_TYPE_TRAITS`
+- `ETL_FORCE_TEST_CPP03_IMPLEMENTATION`
+- `ETL_CXX_STANDARD`
+- ccache launcher flags
+
+## CMake Build Convention
+
+Linux compiler and syntax workflows should use the shared build action:
+
+- `../actions/build-cmake-etl/action.yml`
+
+This standardizes:
+
+- `cmake --version` output
+- compiler version output
+- `cmake --build . --parallel`
+
+Windows MSVC also uses `cmake --build` (with `--parallel`).
+
 Rationale:
 
 - Isolates caches between workflows and jobs.

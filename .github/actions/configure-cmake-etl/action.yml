@@ -1,0 +1,38 @@
+name: Configure CMake for ETL
+description: Configure CMake with the shared ETL build flags used by Linux workflows.
+
+inputs:
+  source-dir:
+    description: Source directory passed to CMake.
+    required: true
+  no-stl:
+    description: Value for NO_STL (ON/OFF).
+    required: true
+  force-cpp03:
+    description: Value for ETL_FORCE_TEST_CPP03_IMPLEMENTATION (ON/OFF).
+    required: true
+  cxx-standard:
+    description: ETL_CXX_STANDARD value.
+    required: true
+  build-tests-flag:
+    description: Optional build tests flag (for example -DBUILD_TESTS=ON).
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Configure CMake
+      shell: bash
+      run: |
+        set -euo pipefail
+        cmake \
+          ${{ inputs.build-tests-flag }} \
+          -DNO_STL=${{ inputs.no-stl }} \
+          -DETL_USE_TYPE_TRAITS_BUILTINS=OFF \
+          -DETL_USER_DEFINED_TYPE_TRAITS=OFF \
+          -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=${{ inputs.force-cpp03 }} \
+          -DETL_CXX_STANDARD=${{ inputs.cxx-standard }} \
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+          ${{ inputs.source-dir }}

@@ -170,16 +170,24 @@ jobs:
         chmod +x ./llvm.sh
         sudo ./llvm.sh 17
 
+    - name: Configure CMake
+      uses: ./.github/actions/configure-cmake-etl
+      env:
+        CC: ${{ matrix.cc }}
+        CXX: ${{ matrix.cxx }}
+      with:
+        source-dir: ./
+        build-tests-flag: -DBUILD_TESTS=ON
+        no-stl: ${{ matrix.no_stl }}
+        force-cpp03: ${{ matrix.force_cpp03 }}
+        cxx-standard: ${{ matrix.cxx_standard }}
+
     - name: Build
-      run: |
-        export CC=${{ matrix.cc }}
-        export CXX=${{ matrix.cxx }}
+      uses: ./.github/actions/build-cmake-etl
+      with:
+        compiler-version-command: ${{ matrix.cc }}
         # Leak detection remains disabled in CI until historical sanitizer noise is addressed.
-        export ASAN_OPTIONS=alloc_dealloc_mismatch=0,detect_leaks=0
-        cmake --version
-        ${{ matrix.cc }} --version
-        cmake -DBUILD_TESTS=ON -DNO_STL=${{ matrix.no_stl }} -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=${{ matrix.force_cpp03 }} -DETL_CXX_STANDARD=${{ matrix.cxx_standard }} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./
-        make -j $(getconf _NPROCESSORS_ONLN)
+        asan-options: alloc_dealloc_mismatch=0,detect_leaks=0
 
     - name: Run tests
       run: ./test/etl_tests -v

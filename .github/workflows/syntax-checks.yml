@@ -45,10 +45,18 @@ jobs:
       with:
         key-suffix: ${{ matrix.cc }}-cpp${{ matrix.cxx_standard }}-nostl${{ matrix.no_stl }}-cpp03${{ matrix.force_cpp03 }}
 
+    - name: Configure CMake
+      uses: ./.github/actions/configure-cmake-etl
+      env:
+        CC: ${{ matrix.cc }}
+        CXX: ${{ matrix.cxx }}
+      with:
+        source-dir: ./test/syntax_check
+        no-stl: ${{ matrix.no_stl }}
+        force-cpp03: ${{ matrix.force_cpp03 }}
+        cxx-standard: ${{ matrix.cxx_standard }}
+
     - name: Build
-      run: |
-        export CC=${{ matrix.cc }}
-        export CXX=${{ matrix.cxx }}
-        cmake -DNO_STL=${{ matrix.no_stl }} -DETL_USE_TYPE_TRAITS_BUILTINS=OFF -DETL_USER_DEFINED_TYPE_TRAITS=OFF -DETL_FORCE_TEST_CPP03_IMPLEMENTATION=${{ matrix.force_cpp03 }} -DETL_CXX_STANDARD=${{ matrix.cxx_standard }} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ./test/syntax_check
-        ${{ matrix.cc }} --version
-        make -j $(getconf _NPROCESSORS_ONLN)
+      uses: ./.github/actions/build-cmake-etl
+      with:
+        compiler-version-command: ${{ matrix.cc }}
