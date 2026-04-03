@@ -27,6 +27,12 @@ Build workflows use this key pattern for ccache isolation and invalidation:
 
 `<runner.os>-<github.workflow>-<github.job>-<matrix-axes>-<hashFiles(CMakeLists.txt,test/CMakeLists.txt)>`
 
+This convention is implemented by the shared composite action:
+
+- `../actions/setup-ccache/action.yml`
+
+Compiler and syntax workflows should call this action instead of invoking `hendrikmuhs/ccache-action` directly.
+
 Rationale:
 
 - Isolates caches between workflows and jobs.

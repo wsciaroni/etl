@@ -1,0 +1,25 @@
+name: Setup ccache
+description: Configure ccache with a standardized cache key for CI workflows.
+
+inputs:
+  key-suffix:
+    description: Matrix-specific key suffix used to isolate cache entries.
+    required: true
+  variant:
+    description: ccache-action cache variant.
+    required: false
+    default: ccache
+  max-size:
+    description: Maximum ccache storage size.
+    required: false
+    default: 500M
+
+runs:
+  using: composite
+  steps:
+    - name: Setup ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ runner.os }}-${{ github.workflow }}-${{ github.job }}-${{ inputs.key-suffix }}-${{ hashFiles('CMakeLists.txt', 'test/CMakeLists.txt') }}
+        variant: ${{ inputs.variant }}
+        max-size: ${{ inputs.max-size }}

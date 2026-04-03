@@ -60,9 +60,10 @@ jobs:
       uses: actions/checkout@v6
 
     - name: Setup ccache
-      uses: hendrikmuhs/ccache-action@v1.2
+      uses: ./.github/actions/setup-ccache
       with:
-        key: ${{ runner.os }}-${{ github.workflow }}-${{ github.job }}-cpp${{ matrix.cxx_standard }}-nostl${{ matrix.no_stl }}-cpp03${{ matrix.force_cpp03 }}-${{ hashFiles('CMakeLists.txt', 'test/CMakeLists.txt') }}
+        key-suffix: cpp${{ matrix.cxx_standard }}-nostl${{ matrix.no_stl }}-cpp03${{ matrix.force_cpp03 }}
+
 
     - name: Build
       run: |
