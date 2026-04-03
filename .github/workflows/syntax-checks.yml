@@ -7,6 +7,10 @@ on:
     branches: [ master, development, pull-request/* ]
     types: [opened, synchronize, reopened]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -14,8 +18,10 @@ jobs:
   build:
     name: Syntax Check - ${{ matrix.cc == 'gcc' && 'GCC' || 'Clang' }} C++${{ matrix.cxx_standard }} Linux ${{ matrix.no_stl == 'ON' && 'No STL' || 'STL' }}${{ matrix.force_cpp03 == 'ON' && ' Force C++03' || '' }}
     runs-on: ubuntu-22.04
+    timeout-minutes: 45
 
     strategy:
+      fail-fast: false
       matrix:
         cc: [gcc, clang]
         cxx_standard: ['03', '11', '14', '17', '20', '23']
@@ -31,11 +37,13 @@ jobs:
             force_cpp03: 'ON'
 
     steps:
-    - uses: actions/checkout@v6
+    - name: Checkout
+      uses: actions/checkout@v6
 
-    - uses: hendrikmuhs/ccache-action@v1.2
+    - name: Setup ccache
+      uses: ./.github/actions/setup-ccache
       with:
-        key: ${{ github.job }}-${{ matrix.cc }}-${{ matrix.cxx_standard }}-${{ matrix.no_stl }}-${{ matrix.force_cpp03 }}
+        key-suffix: ${{ matrix.cc }}-cpp${{ matrix.cxx_standard }}-nostl${{ matrix.no_stl }}-cpp03${{ matrix.force_cpp03 }}
 
     - name: Build
       run: |

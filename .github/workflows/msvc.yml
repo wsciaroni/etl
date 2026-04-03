@@ -6,10 +6,18 @@ on:
     branches: [ master, development, pull-request/* ]
     types: [opened, synchronize, reopened]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-windows:
     name: Windows (NO_STL=${{ matrix.no_stl }}, CPP03=${{ matrix.force_cpp03 }})
     runs-on: windows-2022
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -31,11 +39,10 @@ jobs:
     - name: Setup ccache
       # This action automatically downloads ccache, wires it into GitHub Actions cache,
       # and configures it to handle MSVC quirks (like /Zi debug info).
-      uses: hendrikmuhs/ccache-action@v1.2
+      uses: ./.github/actions/setup-ccache
       with:
-        key: ${{ runner.os }}-ccache-nostl-${{ matrix.no_stl }}-cpp03-${{ matrix.force_cpp03 }}
-        variant: ccache
-        max-size: "500M"
+        key-suffix: nostl${{ matrix.no_stl }}-cpp03${{ matrix.force_cpp03 }}
+
 
     - name: Configure CMake
       run: |
@@ -54,6 +61,18 @@ jobs:
 
     - name: Run tests
       run: test/etl_tests.exe -v
+
+    - name: Upload failure artifacts
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: msvc-failure-nostl${{ matrix.no_stl }}-cpp03${{ matrix.force_cpp03 }}
+        path: |
+          test/etl_tests.exe
+          CMakeCache.txt
+          Testing/Temporary/LastTest.log
+        if-no-files-found: ignore
+        retention-days: 14
 
     - name: Print ccache statistics
       run: ccache -s
