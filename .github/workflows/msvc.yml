@@ -9,10 +9,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   build-windows:
     name: Windows (NO_STL=${{ matrix.no_stl }}, CPP03=${{ matrix.force_cpp03 }})
