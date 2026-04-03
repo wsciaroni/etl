@@ -4,9 +4,17 @@ on:
   release:
     types: [published]  # Trigger only when a GitHub release is published
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   publish:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repository
@@ -15,10 +23,12 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.x"
+          python-version: "3.11"
 
       - name: Install PlatformIO
-        run: pip install platformio
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install platformio==6.1.18
 
       - name: Publish to PlatformIO Registry
         run: pio package publish --owner etlcpp --non-interactive
