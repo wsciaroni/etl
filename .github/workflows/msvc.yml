@@ -53,20 +53,11 @@ jobs:
     - name: Build
       run: cmake --build . --parallel
 
-    - name: Run tests
-      run: test/etl_tests.exe -v
-
-    - name: Upload failure artifacts
-      if: failure()
-      uses: actions/upload-artifact@v4
+    - name: Post build checks
+      uses: ./.github/actions/post-build-windows
       with:
-        name: msvc-failure-nostl${{ matrix.no_stl }}-cpp03${{ matrix.force_cpp03 }}
-        path: |
+        artifact-name: msvc-failure-nostl${{ matrix.no_stl }}-cpp03${{ matrix.force_cpp03 }}
+        artifact-path: |
           test/etl_tests.exe
           CMakeCache.txt
           Testing/Temporary/LastTest.log
-        if-no-files-found: ignore
-        retention-days: 14
-
-    - name: Print ccache statistics
-      run: ccache -s

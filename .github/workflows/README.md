@@ -66,6 +66,19 @@ This standardizes:
 
 Windows MSVC also uses `cmake --build` (with `--parallel`).
 
+## Post Build Convention
+
+Compiler workflows should use shared post-build actions for test execution and diagnostics:
+
+- `../actions/post-build-linux/action.yml`
+- `../actions/post-build-windows/action.yml`
+
+This centralizes:
+
+- test command execution
+- failure artifact uploads
+- ccache statistics output
+
 Rationale:
 
 - Isolates caches between workflows and jobs.

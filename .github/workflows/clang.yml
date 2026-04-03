@@ -189,20 +189,13 @@ jobs:
         # Leak detection remains disabled in CI until historical sanitizer noise is addressed.
         asan-options: alloc_dealloc_mismatch=0,detect_leaks=0
 
-    - name: Run tests
-      run: ./test/etl_tests -v
-
-    - name: Upload failure artifacts
-      if: failure()
-      uses: actions/upload-artifact@v4
+    - name: Post build checks
+      uses: ./.github/actions/post-build-linux
       with:
-        name: clang-failure-${{ matrix.os_name }}-cpp${{ matrix.cxx_standard }}-nostl${{ matrix.no_stl }}-cpp03${{ matrix.force_cpp03 }}
-        path: |
+        test-command: ./test/etl_tests -v
+        artifact-name: clang-failure-${{ matrix.os_name }}-cpp${{ matrix.cxx_standard }}-nostl${{ matrix.no_stl }}-cpp03${{ matrix.force_cpp03 }}
+        artifact-path: |
           ./test/etl_tests
           ./CMakeCache.txt
           ./Testing/Temporary/LastTest.log
-        if-no-files-found: ignore
-        retention-days: 14
 
-    - name: Print ccache statistics
-      run: ccache -s
