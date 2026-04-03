@@ -1,5 +1,5 @@
 name: Configure CMake for ETL
-description: Configure CMake with the shared ETL build flags used by Linux workflows.
+description: Configure CMake with the shared ETL build flags used by CI workflows.
 
 inputs:
   source-dir:

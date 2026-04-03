@@ -1,5 +1,5 @@
 name: Build CMake for ETL
-description: Print tool versions and build with cmake --build for Linux workflows.
+description: Print tool versions and build with cmake --build for bash-based Linux/macOS workflows.
 
 inputs:
   compiler-version-command:
