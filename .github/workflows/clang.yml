@@ -157,13 +157,15 @@ jobs:
     - name: Setup ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
-        key: ${{ github.job }}-${{ matrix.os }}-${{ matrix.cxx_standard }}-${{ matrix.no_stl }}-${{ matrix.force_cpp03 }}
+        key: ${{ runner.os }}-${{ github.workflow }}-${{ github.job }}-${{ matrix.os_name }}-cpp${{ matrix.cxx_standard }}-nostl${{ matrix.no_stl }}-cpp03${{ matrix.force_cpp03 }}-${{ hashFiles('CMakeLists.txt', 'test/CMakeLists.txt') }}
 
     # Temporary fix for Ubuntu runner. See https://github.com/actions/runner-images/issues/8659
     - name: Install newer Clang
       if: matrix.needs_newer_clang
       run: |
-        wget https://apt.llvm.org/llvm.sh
+        set -euo pipefail
+        curl -fsSL --retry 5 --retry-delay 2 --retry-connrefused https://apt.llvm.org/llvm.sh -o llvm.sh
+        grep -q '^#!/usr/bin/env bash' llvm.sh
         chmod +x ./llvm.sh
         sudo ./llvm.sh 17
 
@@ -171,6 +173,7 @@ jobs:
       run: |
         export CC=${{ matrix.cc }}
         export CXX=${{ matrix.cxx }}
+        # Leak detection remains disabled in CI until historical sanitizer noise is addressed.
         export ASAN_OPTIONS=alloc_dealloc_mismatch=0,detect_leaks=0
         cmake --version
         ${{ matrix.cc }} --version

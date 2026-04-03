@@ -43,7 +43,7 @@ jobs:
     - name: Setup ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
-        key: ${{ github.job }}-${{ matrix.cc }}-${{ matrix.cxx_standard }}-${{ matrix.no_stl }}-${{ matrix.force_cpp03 }}
+        key: ${{ runner.os }}-${{ github.workflow }}-${{ github.job }}-${{ matrix.cc }}-cpp${{ matrix.cxx_standard }}-nostl${{ matrix.no_stl }}-cpp03${{ matrix.force_cpp03 }}-${{ hashFiles('CMakeLists.txt', 'test/CMakeLists.txt') }}
 
     - name: Build
       run: |

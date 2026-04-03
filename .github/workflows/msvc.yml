@@ -41,7 +41,7 @@ jobs:
       # and configures it to handle MSVC quirks (like /Zi debug info).
       uses: hendrikmuhs/ccache-action@v1.2
       with:
-        key: ${{ runner.os }}-ccache-nostl-${{ matrix.no_stl }}-cpp03-${{ matrix.force_cpp03 }}
+        key: ${{ runner.os }}-${{ github.workflow }}-${{ github.job }}-nostl${{ matrix.no_stl }}-cpp03${{ matrix.force_cpp03 }}-${{ hashFiles('CMakeLists.txt', 'test/CMakeLists.txt') }}
         variant: ccache
         max-size: "500M"
 

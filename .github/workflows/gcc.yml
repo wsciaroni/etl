@@ -62,10 +62,11 @@ jobs:
     - name: Setup ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
-        key: ${{ github.job }}-${{ matrix.cxx_standard }}-${{ matrix.no_stl }}-${{ matrix.force_cpp03 }}
+        key: ${{ runner.os }}-${{ github.workflow }}-${{ github.job }}-cpp${{ matrix.cxx_standard }}-nostl${{ matrix.no_stl }}-cpp03${{ matrix.force_cpp03 }}-${{ hashFiles('CMakeLists.txt', 'test/CMakeLists.txt') }}
 
     - name: Build
       run: |
+        # Leak detection remains disabled in CI until historical sanitizer noise is addressed.
         export ASAN_OPTIONS=alloc_dealloc_mismatch=0,detect_leaks=0
         export CC=gcc
         export CXX=g++
