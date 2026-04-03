@@ -22,4 +22,4 @@ runs:
         fi
         cmake --version
         ${{ inputs.compiler-version-command }} --version
-        cmake --build . --parallel
+        cmake --build . --parallel 2

@@ -47,7 +47,7 @@ jobs:
         force-cpp03: ${{ matrix.force_cpp03 }}
 
     - name: Build
-      run: cmake --build . --parallel
+      run: cmake --build . --parallel 2
 
     - name: Post build checks
       uses: ./.github/actions/post-build-windows
