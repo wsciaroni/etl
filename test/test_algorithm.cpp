@@ -29,6 +29,7 @@ SOFTWARE.
 #include "unit_test_framework.h"
 
 #include "etl/algorithm.h"
+#include "etl/array.h"
 #include "etl/container.h"
 #include "etl/binary.h"
 
@@ -114,6 +115,24 @@ namespace
     {
       return lhs.a == rhs.a;
     }
+  };
+
+  struct TaggedRecord
+  {
+    TaggedRecord()
+      : value(0)
+      , tag(0)
+    {
+    }
+
+    TaggedRecord(int value_, int tag_)
+      : value(value_)
+      , tag(tag_)
+    {
+    }
+
+    int value;
+    int tag;
   };
 
   Data dataD[10] = { Data(1, 2), Data(2, 1), Data(3, 4), Data(4, 3), Data(5, 6), Data(6, 5), Data(7, 8), Data(8, 7), Data(9, 10), Data(10, 9) };
@@ -2385,6 +2404,198 @@ namespace
 
         compare = initial;
         data = initial;
+      }
+    }
+
+    //*************************************************************************
+    TEST(stable_partition_required_etl_array_case)
+    {
+      etl::array<int, 9> data     = { 0, 0, 3, -1, 2, 4, 5, 0, 7 };
+      etl::array<int, 9> expected = { 3, 2, 4, 5, 7, 0, 0, -1, 0 };
+
+      etl::array<int, 9>::iterator partition_point = etl::stable_partition(data.begin(),
+                                                                            data.end(),
+                                                                            [](int value) { return value > 0; });
+
+      CHECK_EQUAL(5, std::distance(data.begin(), partition_point));
+      CHECK_EQUAL(0, *partition_point);
+
+      bool is_same = std::equal(expected.begin(), expected.end(), data.begin());
+      CHECK(is_same);
+    }
+
+    //*************************************************************************
+    TEST(stable_partition_matches_std_vector)
+    {
+      std::vector<int> data_std = { 0, 0, 3, -1, 2, 4, 5, 0, 7 };
+      std::vector<int> data_etl = data_std;
+
+      std::vector<int>::iterator std_partition_point = std::stable_partition(data_std.begin(),
+                                                                             data_std.end(),
+                                                                             [](int value) { return value > 0; });
+      std::vector<int>::iterator etl_partition_point = etl::stable_partition(data_etl.begin(),
+                                                                             data_etl.end(),
+                                                                             [](int value) { return value > 0; });
+
+      CHECK_EQUAL(std::distance(data_std.begin(), std_partition_point),
+                  std::distance(data_etl.begin(), etl_partition_point));
+
+      bool is_same = std::equal(data_std.begin(), data_std.end(), data_etl.begin());
+      CHECK(is_same);
+    }
+
+    //*************************************************************************
+    TEST(stable_partition_forward_iterator_container)
+    {
+      std::forward_list<int> data = { 0, 0, 3, -1, 2, 4, 5, 0, 7 };
+      std::array<int, 9> expected = { 3, 2, 4, 5, 7, 0, 0, -1, 0 };
+
+      std::forward_list<int>::iterator partition_point = etl::stable_partition(data.begin(),
+                                                                                data.end(),
+                                                                                [](int value) { return value > 0; });
+
+      CHECK_EQUAL(5, std::distance(data.begin(), partition_point));
+
+      bool is_same = std::equal(data.begin(), data.end(), expected.begin());
+      CHECK(is_same);
+    }
+
+    //*************************************************************************
+    TEST(stable_partition_edge_cases)
+    {
+      std::vector<int> empty;
+      std::vector<int>::iterator empty_partition = etl::stable_partition(empty.begin(),
+                                                                          empty.end(),
+                                                                          [](int value) { return value > 0; });
+      CHECK(empty_partition == empty.end());
+
+      std::vector<int> all_true = { 1, 3, 5, 7 };
+      std::vector<int>::iterator all_true_partition = etl::stable_partition(all_true.begin(),
+                                                                             all_true.end(),
+                                                                             [](int value) { return value > 0; });
+      CHECK(all_true_partition == all_true.end());
+
+      std::vector<int> all_false = { 0, -1, 0, -2 };
+      std::vector<int>::iterator all_false_partition = etl::stable_partition(all_false.begin(),
+                                                                              all_false.end(),
+                                                                              [](int value) { return value > 0; });
+      CHECK(all_false_partition == all_false.begin());
+    }
+
+    //*************************************************************************
+    TEST(stable_partition_non_trivial_tagged_records_preserve_order)
+    {
+      std::vector<TaggedRecord> data = {
+        TaggedRecord(0,  10),
+        TaggedRecord(3,  20),
+        TaggedRecord(-1, 11),
+        TaggedRecord(2,  21),
+        TaggedRecord(0,  12),
+        TaggedRecord(4,  22),
+        TaggedRecord(-2, 13),
+        TaggedRecord(5,  23)
+      };
+
+      std::vector<TaggedRecord>::iterator partition_point = etl::stable_partition(data.begin(),
+                                                                                   data.end(),
+                                                                                   [](const TaggedRecord& r) { return r.value > 0; });
+
+      CHECK_EQUAL(4, std::distance(data.begin(), partition_point));
+
+      const std::array<int, 4> expected_true_tags  = { 20, 21, 22, 23 };
+      const std::array<int, 4> expected_false_tags = { 10, 11, 12, 13 };
+
+      for (size_t i = 0U; i < expected_true_tags.size(); ++i)
+      {
+        CHECK(data[i].value > 0);
+        CHECK_EQUAL(expected_true_tags[i], data[i].tag);
+      }
+
+      for (size_t i = 0U; i < expected_false_tags.size(); ++i)
+      {
+        const size_t index = i + expected_true_tags.size();
+        CHECK(data[index].value <= 0);
+        CHECK_EQUAL(expected_false_tags[i], data[index].tag);
+      }
+    }
+
+    //*************************************************************************
+    TEST(stable_partition_with_external_scratch_memory)
+    {
+      etl::array<int, 9> data     = { 0, 0, 3, -1, 2, 4, 5, 0, 7 };
+      etl::array<int, 9> scratch  = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+      etl::array<int, 9> expected = { 3, 2, 4, 5, 7, 0, 0, -1, 0 };
+
+      etl::array<int, 9>::iterator partition_point = etl::stable_partition(data.begin(),
+                                                                            data.end(),
+                                                                            scratch.begin(),
+                                                                            [](int value) { return value > 0; });
+
+      CHECK_EQUAL(5, std::distance(data.begin(), partition_point));
+      CHECK_EQUAL(0, *partition_point);
+
+      bool is_same = std::equal(expected.begin(), expected.end(), data.begin());
+      CHECK(is_same);
+    }
+
+    //*************************************************************************
+    TEST(stable_partition_with_external_scratch_memory_range)
+    {
+      std::vector<int> data    = { 0, 0, 3, -1, 2, 4, 5, 0, 7 };
+      std::vector<int> scratch = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+      std::vector<int> expected = { 3, 2, 4, 5, 7, 0, 0, -1, 0 };
+
+      std::vector<int>::iterator partition_point = etl::stable_partition(data.begin(),
+                                                                          data.end(),
+                                                                          scratch.begin(),
+                                                                          scratch.end(),
+                                                                          [](int value) { return value > 0; });
+
+      CHECK_EQUAL(5, std::distance(data.begin(), partition_point));
+      CHECK_EQUAL(0, *partition_point);
+
+      bool is_same = std::equal(expected.begin(), expected.end(), data.begin());
+      CHECK(is_same);
+    }
+
+    //*************************************************************************
+    TEST(stable_partition_with_external_scratch_memory_non_trivial)
+    {
+      std::vector<TaggedRecord> data = {
+        TaggedRecord(0,  10),
+        TaggedRecord(3,  20),
+        TaggedRecord(-1, 11),
+        TaggedRecord(2,  21),
+        TaggedRecord(0,  12),
+        TaggedRecord(4,  22),
+        TaggedRecord(-2, 13),
+        TaggedRecord(5,  23)
+      };
+
+      std::vector<TaggedRecord> scratch(data.size());
+
+      std::vector<TaggedRecord>::iterator partition_point = etl::stable_partition(data.begin(),
+                                                                                   data.end(),
+                                                                                   scratch.begin(),
+                                                                                   scratch.end(),
+                                                                                   [](const TaggedRecord& r) { return r.value > 0; });
+
+      CHECK_EQUAL(4, std::distance(data.begin(), partition_point));
+
+      const std::array<int, 4> expected_true_tags  = { 20, 21, 22, 23 };
+      const std::array<int, 4> expected_false_tags = { 10, 11, 12, 13 };
+
+      for (size_t i = 0U; i < expected_true_tags.size(); ++i)
+      {
+        CHECK(data[i].value > 0);
+        CHECK_EQUAL(expected_true_tags[i], data[i].tag);
+      }
+
+      for (size_t i = 0U; i < expected_false_tags.size(); ++i)
+      {
+        const size_t index = i + expected_true_tags.size();
+        CHECK(data[index].value <= 0);
+        CHECK_EQUAL(expected_false_tags[i], data[index].tag);
       }
     }
 
